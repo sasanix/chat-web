@@ -36,6 +36,7 @@ footer{position:relative;z-index:10;padding:10px 14px;background:rgba(15,23,42,.
 #msgInput{flex:1;background:rgba(30,41,59,.6);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:9px 14px;color:#f8fafc;font-size:.85rem;outline:none}
 #msgInput::placeholder{color:#94a3b8}
 #sendBtn{background:linear-gradient(135deg,#6366f1,#ec4899);border:none;color:#fff;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.error-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,41,59,.95);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:24px;color:#f1f5f9;text-align:center;font-size:.9rem;line-height:1.8;z-index:100;max-width:80%}
 </style>
 </head>
 <body>
@@ -48,10 +49,10 @@ footer{position:relative;z-index:10;padding:10px 14px;background:rgba(15,23,42,.
 
 <header>
 <div class="user-info">
-<div class="avatar">م</div>
+<div class="avatar" id="avatarEl">?</div>
 <div class="status">
-<h3>چت خصوصی</h3>
-<span id="presenceStatus">متصل به گیت‌هاب</span>
+<h3 id="chatTitle">چت خصوصی</h3>
+<span id="presenceStatus">در حال اتصال...</span>
 </div>
 </div>
 </header>
@@ -77,43 +78,148 @@ const tokenPart2 = '_M10flwPtPqL7slsyycEwWN0i6DA1SXTcWX2pp7vCyU5KMXY5ZYXa7dwu7dd
 const GITHUB_TOKEN = tokenPart1 + tokenPart2;
 const OWNER = 'sasanix';
 const REPO = 'chat-db';
-const ISSUE_NUMBER = '1';
 
 const params = new URLSearchParams(window.location.search);
 const ME = params.get('me') || 'کاربر';
-document.querySelector('.avatar').innerText = ME.charAt(0);
+const TO = params.get('to') || null;
 
 const chatArea = document.getElementById('chatArea');
 const input = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
+const chatTitle = document.getElementById('chatTitle');
+const avatarEl = document.getElementById('avatarEl');
+const presenceStatus = document.getElementById('presenceStatus');
 
-// ------------------------------------------
-// دریافت پیام‌ها از گیت‌هاب
-// ------------------------------------------
-async function fetchMessages() {
+let ISSUE_NUMBER = null;
+let lastETag = null;
+
+avatarEl.innerText = ME.charAt(0).toUpperCase();
+
+// اگر اسم طرف مقابل وارد نشده باشد
+if (!ME || !TO) {
+  document.getElementById('app').innerHTML = `
+    <div class="error-box">
+      <div style="font-size:1.2rem;margin-bottom:12px">⚠️ لینک ناقص است</div>
+      لطفاً اسم خود و طرف مقابل را در لینک مشخص کنید.<br><br>
+      <b>مثال:</b><br>
+      ?me=Sasan&to=Ali
+    </div>
+  `;
+} else {
+  chatTitle.innerText = `چت با ${TO}`;
+  startChat();
+}
+
+// ==========================================
+// ساخت نام اتاق (مرتب شده بر اساس حروف الفبا)
+// ==========================================
+function getRoomTitle() {
+  const sorted = [ME.toLowerCase().trim(), TO.toLowerCase().trim()].sort();
+  return `Chat-${sorted[0]}-${sorted[1]}`;
+}
+
+// ==========================================
+// پیدا کردن یا ساختن اتاق
+// ==========================================
+async function findOrCreateRoom() {
+  presenceStatus.innerText = 'در حال جستجوی اتاق...';
+  const roomTitle = getRoomTitle();
+  
   try {
-    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, {
+    // جستجوی اتاق موجود
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100`, {
       headers: { 
         'Authorization': `Bearer ${GITHUB_TOKEN}`,
         'Accept': 'application/vnd.github+json'
       }
     });
     
-    if (!res.ok) {
-      console.error('Fetch status:', res.status);
-      return;
+    if (!res.ok) throw new Error('خطا در جستجوی اتاق');
+    const issues = await res.json();
+    const existing = issues.find(i => i.title === roomTitle);
+    
+    if (existing) {
+      presenceStatus.innerText = 'متصل به گیت‌هاب';
+      return existing.number;
     }
     
+    // ساخت اتاق جدید
+    presenceStatus.innerText = 'در حال ساخت اتاق جدید...';
+    const createRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github+json'
+      },
+      body: JSON.stringify({ title: roomTitle, body: `اتاق خودکار بین ${ME} و ${TO}` })
+    });
+    
+    if (!createRes.ok) throw new Error('خطا در ساخت اتاق');
+    const newIssue = await createRes.json();
+    presenceStatus.innerText = 'متصل به گیت‌هاب';
+    return newIssue.number;
+    
+  } catch (error) {
+    console.error('Room error:', error);
+    presenceStatus.innerText = 'خطا در اتصال';
+    return null;
+  }
+}
+
+// ==========================================
+// شروع چت
+// ==========================================
+async function startChat() {
+  ISSUE_NUMBER = await findOrCreateRoom();
+  if (!ISSUE_NUMBER) {
+    alert('اتصال به سرور برقرار نشد. لطفاً اینترنت خود را بررسی کنید.');
+    return;
+  }
+  
+  await fetchMessages();
+  setInterval(fetchMessages, 4000);
+}
+
+// ==========================================
+// دریافت پیام‌ها با ETag (بهینه از نظر مصرف API)
+// ==========================================
+async function fetchMessages() {
+  if (!ISSUE_NUMBER) return;
+  
+  try {
+    const headers = {
+      'Authorization': `Bearer ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github+json'
+    };
+    if (lastETag) headers['If-None-Match'] = lastETag;
+    
+    const res = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`,
+      { headers }
+    );
+    
+    if (res.status === 304) return; // پیام جدیدی نیست
+    if (!res.ok) return;
+    
+    lastETag = res.headers.get('ETag');
     const data = await res.json();
+    
     chatArea.innerHTML = `<div class="pill">امروز</div>
       <div class="enc-notice"><span>🔒</span> این چت روی سرور گیت‌هاب ذخیره می‌شود.</div>`;
 
     data.forEach(msg => {
-      const parts = msg.body.split(': ');
-      const sender = parts[0];
-      const text = parts.slice(1).join(': ');
-      const isMe = sender === ME;
+      // فرمت: "Name: text"
+      const colonIdx = msg.body.indexOf(': ');
+      if (colonIdx === -1) return;
       
+      const sender = msg.body.substring(0, colonIdx);
+      const text = msg.body.substring(colonIdx + 2);
+      
+      // فقط پیام‌های من و طرف مقابل را نمایش بده
+      if (sender !== ME && sender !== TO) return;
+      
+      const isMe = sender === ME;
       renderMessage(text, isMe, msg.created_at);
     });
   } catch (error) {
@@ -121,9 +227,9 @@ async function fetchMessages() {
   }
 }
 
-// ------------------------------------------
+// ==========================================
 // نمایش پیام روی صفحه
-// ------------------------------------------
+// ==========================================
 function renderMessage(text, isMe, timestamp) {
   const wrap = document.createElement('div');
   wrap.className = 'msg-wrap' + (isMe ? ' me' : '');
@@ -132,7 +238,7 @@ function renderMessage(text, isMe, timestamp) {
   
   wrap.innerHTML = `
     <div class="msg-bubble">
-      <p>${text}</p>
+      <p>${escapeHtml(text)}</p>
       <div class="msg-meta">
         <span>${time}</span>
       </div>
@@ -143,16 +249,18 @@ function renderMessage(text, isMe, timestamp) {
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-// ------------------------------------------
-// ارسال پیام جدید به گیت‌هاب
-// ------------------------------------------
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ==========================================
+// ارسال پیام
+// ==========================================
 async function sendMessage() {
   const text = input.value.trim();
-  if (!text) return;
+  if (!text || !ISSUE_NUMBER) return;
   
   input.value = '';
-  
-  // نمایش فوری پیام روی صفحه خودمون
   renderMessage(text, true, new Date().toISOString());
   
   try {
@@ -168,6 +276,10 @@ async function sendMessage() {
     
     if (!res.ok) {
       alert('خطا در ارسال پیام. وضعیت: ' + res.status);
+    } else {
+      // به‌روزرسانی فوری برای دیدن پیام خود
+      lastETag = null;
+      setTimeout(fetchMessages, 500);
     }
   } catch (error) {
     console.error('Send error:', error);
@@ -178,13 +290,9 @@ async function sendMessage() {
 sendBtn.addEventListener('click', sendMessage);
 input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
 
-// شروع دریافت پیام‌ها (هر ۳ ثانیه یکبار چک می‌کند)
-fetchMessages();
-setInterval(fetchMessages, 3000);
-
-// ------------------------------------------
+// ==========================================
 // افکت ستاره‌ها در پس زمینه
-// ------------------------------------------
+// ==========================================
 const canvas=document.getElementById("bgCanvas"), ctx=canvas.getContext("2d");
 let particles=[];
 function resizeCanvas(){canvas.width=canvas.parentElement.clientWidth;canvas.height=canvas.parentElement.clientHeight;}
