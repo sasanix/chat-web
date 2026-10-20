@@ -90,10 +90,16 @@ const sendBtn = document.getElementById('sendBtn');
 async function fetchMessages() {
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, {
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+      headers: { 
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github+json'
+      }
     });
     
-    if (!res.ok) throw new Error('خطا در دریافت اطلاعات');
+    if (!res.ok) {
+      console.error('Fetch status:', res.status);
+      return;
+    }
     
     const data = await res.json();
     chatArea.innerHTML = `<div class="pill">امروز</div>
@@ -150,14 +156,15 @@ async function sendMessage() {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, {
       method: 'POST',
       headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github+json'
       },
       body: JSON.stringify({ body: `${ME}: ${text}` })
     });
     
     if (!res.ok) {
-      alert('خطا در ارسال پیام. لطفا اینترنت خود را بررسی کنید.');
+      alert('خطا در ارسال پیام. وضعیت: ' + res.status);
     }
   } catch (error) {
     console.error('Send error:', error);
