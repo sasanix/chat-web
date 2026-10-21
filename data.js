@@ -17,7 +17,7 @@ const DataAdapter = {
             const createRes = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues`, { 
                 method: 'POST', 
                 headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ title: roomTitle, body: `اتاق خودکار` }) 
+                body: JSON.stringify({ title: roomTitle, body: `اتاق VIP` }) 
             });
             const newIssue = await createRes.json(); 
             return newIssue.number;
