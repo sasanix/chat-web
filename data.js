@@ -1,86 +1,94 @@
 // ==========================================
-// لایه داده (Data Layer Adapter)
+// 2. لایه اتصال به دیتابیس (Data Adapter Layer)
 // ==========================================
 const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
 
 const DataAdapter = {
-    // 1. پیدا کردن یا ساختن اتاق
     async getRoom(roomTitle) {
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
-        });
-        const issues = await res.json();
-        const existing = issues.find(i => i.title === roomTitle);
-        if (existing) return existing.number;
-        
-        const createRes = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues`, { 
-            method: 'POST', 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ title: roomTitle, body: `اتاق خودکار` }) 
-        });
-        const newIssue = await createRes.json(); 
-        return newIssue.number;
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
+            });
+            if (!res.ok) throw new Error('Network error');
+            const issues = await res.json();
+            const existing = issues.find(i => i.title === roomTitle);
+            if (existing) return existing.number;
+            
+            const createRes = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues`, { 
+                method: 'POST', 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ title: roomTitle, body: `اتاق خودکار` }) 
+            });
+            const newIssue = await createRes.json(); 
+            return newIssue.number;
+        } catch (e) { console.error(e); return null; }
     },
 
-    // 2. دریافت پیام‌ها
     async fetchMessages(issueNumber, lastETag = null) {
-        const headers = { 'Authorization': `Bearer ${GITHUB_TOKEN}` };
-        if (lastETag) headers['If-None-Match'] = lastETag;
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}/comments`, { headers });
-        
-        if (res.status === 304) return { notModified: true };
-        if (!res.ok) return { error: true };
-        
-        return {
-            notModified: false,
-            etag: res.headers.get('ETag'),
-            data: await res.json()
-        };
+        try {
+            const headers = { 'Authorization': `Bearer ${GITHUB_TOKEN}` };
+            if (lastETag) headers['If-None-Match'] = lastETag;
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}/comments`, { headers });
+            
+            if (res.status === 304) return { notModified: true };
+            if (!res.ok) return { error: true };
+            
+            return {
+                notModified: false,
+                etag: res.headers.get('ETag'),
+                data: await res.json()
+            };
+        } catch (e) { return { error: true }; }
     },
 
-    // 3. ارسال پیام جدید
     async sendMessage(issueNumber, body) {
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}/comments`, { 
-            method: 'POST', 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ body }) 
-        });
-        return res.ok;
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}/comments`, { 
+                method: 'POST', 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ body }) 
+            });
+            return res.ok;
+        } catch (e) { return false; }
     },
 
-    // 4. علامت خوانده شدن
     async markAsRead(commentId, originalBody) {
-        if(originalBody.includes('[READ]')) return;
-        await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/comments/${commentId}`, { 
-            method: 'PATCH', 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ body: originalBody + ' [READ]' }) 
-        });
+        if (originalBody.includes('[READ]')) return;
+        try {
+            await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/comments/${commentId}`, { 
+                method: 'PATCH', 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ body: originalBody + ' [READ]' }) 
+            });
+        } catch(e) {}
     },
 
-    // 5. حذف پیام
     async deleteMessage(commentId) {
-        await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/comments/${commentId}`, { 
-            method: 'DELETE', 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
-        });
+        try {
+            await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/comments/${commentId}`, { 
+                method: 'DELETE', 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
+            });
+        } catch(e) {}
     },
 
-    // 6. آپدیت وضعیت تایپینگ
     async updateTyping(issueNumber, me, time) {
-        await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}`, { 
-            method: 'PATCH', 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ body: `${me}|${time}` }) 
-        });
+        try {
+            await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}`, { 
+                method: 'PATCH', 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ body: `${me}|${time}` }) 
+            });
+        } catch(e) {}
     },
 
-    // 7. چک کردن تایپینگ
     async checkTyping(issueNumber) {
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}`, { 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
-        });
-        const data = await res.json();
-        return data ? data.body : null;
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${issueNumber}`, { 
+                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
+            });
+            const data = await res.json();
+            return data ? data.body : null;
+        } catch(e) { return null; }
     }
 };
