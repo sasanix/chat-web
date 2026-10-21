@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3670/3670051.png">
 </head>
 <body>
 <div id="app">
@@ -34,6 +35,14 @@
 
     <div id="searchBox">
         <input type="text" id="searchInput" placeholder="جستجو در پیام‌ها..." oninput="filterMessages()">
+    </div>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h3>لیست مخاطبین</h3>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">✖</button>
+        </div>
+        <div class="sidebar-list" id="sidebarList"></div>
     </div>
 
     <div id="chatArea">
@@ -96,4 +105,4 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
-</html>
+                                                                                              </html>
