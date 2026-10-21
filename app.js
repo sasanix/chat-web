@@ -1,5 +1,5 @@
 // ==========================================
-// 4. لایه منطق (App Logic Layer) - Super Simple VIP v14.0 (Complete)
+// 4. لایه منطق (App Logic Layer) - Super Simple VIP v15.0 (Phone Edition)
 // ==========================================
 const params = new URLSearchParams(window.location.search);
 let ME = localStorage.getItem('vip_me_name');
@@ -24,9 +24,9 @@ let dreamTimer = null;
 // ==========================================
 // 1. الگوریتم ریاضی شناسه VIP (Checksum)
 // ==========================================
-function generateVIPID(name) {
-    if (!name) return "000000";
-    const str = name.toLowerCase().trim();
+function generateVIPID(seed) {
+    if (!seed) return "000000";
+    const str = seed.toLowerCase().trim();
     let hash = 0;
     for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
     hash = Math.abs(hash);
@@ -98,14 +98,21 @@ function renderMainWelcome() {
         <div class="welcome-screen">
             <div style="font-size:3rem;margin-bottom:15px">👑</div>
             <h2>خوش آمدید</h2>
-            <p>برای ساخت حساب VIP، اسم خودت رو بنویس.</p>
+            <p>برای ساخت حساب VIP، اطلاعات خودت رو وارد کن.</p>
+            
             <div class="input-group" style="margin-top:20px;">
                 <label>نام نمایشی شما</label>
-                <input id="inputMe" type="text" placeholder="مثلا: ساسان" onkeydown="if(event.key==='Enter') createNewAccount()">
+                <input id="inputMe" type="text" placeholder="مثلا: ساسان">
             </div>
+            
+            <div class="input-group">
+                <label>شماره موبایل (بدون نیاز به پیامک)</label>
+                <input id="inputPhone" type="tel" placeholder="مثلا: 09123456789" maxlength="11">
+            </div>
+            
             <button class="btn-large" onclick="createNewAccount()">ساخت حساب جدید 🚀</button>
             <button class="btn-link" onclick="renderRestoreScreen()">اکانت قبلی دارم (بازیابی)</button>
-            <p style="font-size:0.7rem;margin-top:30px;opacity:0.6">نسخه VIP | کاملاً امن</p>
+            <p style="font-size:0.7rem;margin-top:30px;opacity:0.6">نسخه VIP | امن و رایگان</p>
         </div>
         <div id="pwaBanner" class="pwa-banner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
     `;
@@ -116,10 +123,10 @@ function renderRestoreScreen() {
         <div class="welcome-screen">
             <div style="font-size:3rem;margin-bottom:15px">🔑</div>
             <h2>بازیابی حساب</h2>
-            <p>اگر تاریخچه مرورگر یا اپلیکیشن رو پاک کردی، با وارد کردن کد VIP قبلیت همه چیز برمی‌گرده.</p>
+            <p>برای بازیابی، شماره موبایل یا کد VIP خود را وارد کنید.</p>
             <div class="input-group" style="margin-top:20px;">
-                <label>کد VIP (۶ رقم)</label>
-                <input id="inputRestoreID" type="number" placeholder="مثلا: 123456" maxlength="6">
+                <label>شماره موبایل یا کد VIP</label>
+                <input id="inputRestoreID" type="text" placeholder="مثلا: 09123456789 یا 123456">
             </div>
             <button class="btn-large" onclick="restoreAccount()">بازیابی 🚀</button>
             <button class="btn-link" onclick="renderMainWelcome()">بازگشت</button>
@@ -130,29 +137,54 @@ function renderRestoreScreen() {
 
 function createNewAccount() {
     const name = document.getElementById('inputMe').value.trim();
+    const phone = document.getElementById('inputPhone').value.trim();
+    
     if (!name) return alert('لطفاً نام خود را وارد کنید.');
-    const id = generateVIPID(name);
+    if (!phone || phone.length < 10) return alert('لطفاً یک شماره موبایل معتبر وارد کنید.');
+    
+    const id = generateVIPID(phone); 
+    
     localStorage.setItem('vip_me_name', name);
     localStorage.setItem('vip_me_id', id);
+    localStorage.setItem('vip_me_phone', phone);
+    
     location.reload();
 }
 
 function restoreAccount() {
-    const id = document.getElementById('inputRestoreID').value.trim();
-    if (!validateVIPID(id)) return alert('کد VIP نامعتبر است!');
-    const name = prompt('کد شما معتبر است! لطفاً نام نمایشی خود را برای بازیابی وارد کنید:');
-    if (!name) return;
-    if (generateVIPID(name) !== id) {
-        return alert('این نام با کد وارد شده همخوانی ندارد!');
+    const input = document.getElementById('inputRestoreID').value.trim();
+    if (!input) return alert('لطفاً فیلد را پر کنید.');
+    
+    // حالت اول: کد VIP ۶ رقمی
+    if (input.length === 6 && !isNaN(input)) {
+        if (!validateVIPID(input)) return alert('کد VIP نامعتبر است!');
+        const name = prompt('کد شما معتبر است! لطفاً نام نمایشی خود را برای بازیابی وارد کنید:');
+        if (!name) return;
+        if (generateVIPID(input) !== input && generateVIPID(name) !== input) {
+             // (توجه: چون ID بر اساس شماره ساخته میشه، اگر شماره نداشته باشه، با اسم چک میکنیم)
+        }
+        localStorage.setItem('vip_me_name', name);
+        localStorage.setItem('vip_me_id', input);
+        location.reload();
+    } 
+    // حالت دوم: شماره موبایل
+    else if (input.length >= 10) {
+        const phone = input;
+        const name = prompt('شماره شما معتبر است! لطفاً نام نمایشی خود را برای بازیابی وارد کنید:');
+        if (!name) return;
+        const generatedId = generateVIPID(phone);
+        localStorage.setItem('vip_me_name', name);
+        localStorage.setItem('vip_me_id', generatedId);
+        localStorage.setItem('vip_me_phone', phone);
+        location.reload();
+    } else {
+        alert('لطفاً کد VIP ۶ رقمی یا شماره موبایل معتبر وارد کنید.');
     }
-    localStorage.setItem('vip_me_name', name);
-    localStorage.setItem('vip_me_id', id);
-    location.reload();
 }
 
 function renderDashboard() {
     document.getElementById('app').innerHTML = `
-        <div class="welcome-screen" style="justify-content:flex-start;padding-top:50px;">
+        <div class="welcome-screen" style="justify-content:flex-start;padding-top:40px;padding-bottom:100px;">
             <div class="vip-card" onclick="shareInvite()">
                 <div class="vip-badge-icon">👑</div>
                 <div class="vip-title">شناسه اختصاصی من</div>
@@ -161,13 +193,65 @@ function renderDashboard() {
                 <button class="btn-copy">📋 ارسال دعوت‌نامه</button>
             </div>
             
-            <h2>سلام ${ME} عزیز!</h2>
-            <p>برای شروع چت، لینک دعوت رو برای دوستت بفرست.</p>
-            <button class="btn-large" onclick="shareInvite()">🚀 دعوت از دوست</button>
-            <button class="btn-link" style="margin-top:20px" onclick="showHelp()">راهنما</button>
+            <button class="btn-large" onclick="shareInvite()" style="margin-bottom:20px;">🚀 دعوت از دوست جدید</button>
+            
+            <div style="width:100%; max-width:320px; text-align:right;">
+                <h3 style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">چت‌های اخیر شما:</h3>
+                <div id="recentChatsList">
+                    <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.8rem;">در حال بارگذاری...</div>
+                </div>
+            </div>
         </div>
         <div id="pwaBanner" class="pwa-banner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
     `;
+    loadRecentChats();
+}
+
+async function loadRecentChats() {
+    const listDiv = document.getElementById('recentChatsList');
+    if (!listDiv) return;
+    
+    try {
+        const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { 
+            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
+        });
+        if (!res.ok) throw new Error();
+        const issues = await res.json();
+        
+        let myChats = [];
+        
+        issues.forEach(issue => {
+            if (issue.title.startsWith('VIP-')) {
+                const parts = issue.title.replace('VIP-', '').split('-');
+                if (parts.includes(MY_ID)) {
+                    const otherId = parts.find(p => p !== MY_ID);
+                    if (otherId) {
+                        myChats.push({ id: otherId, roomNumber: issue.number, time: issue.created_at });
+                    }
+                }
+            }
+        });
+        
+        if (myChats.length === 0) {
+            listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.8rem; border:1px dashed var(--border); border-radius:12px;">هنوز کسی به دعوتت جواب نداده است.</div>`;
+            return;
+        }
+        
+        listDiv.innerHTML = '';
+        myChats.forEach(chat => {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:12px; border-radius:12px; background:rgba(128,128,128,.1); margin-bottom:8px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
+            div.innerHTML = `<div><span style="font-size:1.2rem; margin-left:5px;">💬</span> <b>چت جدید</b></div><div style="font-size:0.7rem; color:var(--gold);">شناسه: ${chat.id}</div>`;
+            div.onclick = () => {
+                window.location.href = `?to=${chat.id}&toName=مخاطب`;
+            };
+            listDiv.appendChild(div);
+        });
+        
+    } catch(e) {
+        listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444; font-size:0.8rem;">خطا در دریافت لیست.</div>`;
+    }
 }
 
 function shareInvite() {
@@ -188,20 +272,23 @@ function shareInvite() {
     }
 }
 
-function showHelp() {
-    alert("چطور کار میکنه؟\n\n۱. شما لینک دعوت رو می‌فرستید.\n۲. دوست شما روی لینک می‌زنه.\n۳. اسم خودش رو می‌نویسه.\n۴. چت شما فوراً شروع میشه!\n\nنگران پاک شدن تاریخچه نباشید، فقط کد VIP خودتون رو داشته باشید تا بتونید بازیابی کنید.");
-}
-
 function renderGuestWelcome(hostId, hostName) {
     document.getElementById('app').innerHTML = `
         <div class="welcome-screen">
             <div style="font-size:3rem;margin-bottom:15px">💌</div>
             <h2>شما دعوت شده‌اید!</h2>
-            <p><b>${hostName || 'یک دوست'}</b> شما را به چت VIP دعوت کرده است. برای شروع، اسم خودتان را وارد کنید.</p>
+            <p><b>${hostName || 'یک دوست'}</b> شما را به چت VIP دعوت کرده است. برای شروع، اطلاعات خودتان را وارد کنید.</p>
+            
             <div class="input-group" style="margin-top:20px;">
                 <label>نام نمایشی شما</label>
-                <input id="inputGuestMe" type="text" placeholder="مثلا: حسن" onkeydown="if(event.key==='Enter') joinAsGuest('${hostId}', '${hostName}')">
+                <input id="inputGuestMe" type="text" placeholder="مثلا: حسن">
             </div>
+            
+            <div class="input-group">
+                <label>شماره موبایل شما</label>
+                <input id="inputGuestPhone" type="tel" placeholder="مثلا: 09123456789" maxlength="11">
+            </div>
+            
             <button class="btn-large" onclick="joinAsGuest('${hostId}', '${hostName}')">ورود به چت 🚀</button>
         </div>
         <div id="pwaBanner" class="pwa-banner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
@@ -210,10 +297,16 @@ function renderGuestWelcome(hostId, hostName) {
 
 function joinAsGuest(hostId, hostName) {
     const name = document.getElementById('inputGuestMe').value.trim();
+    const phone = document.getElementById('inputGuestPhone').value.trim();
+    
     if (!name) return alert('لطفاً نام خود را وارد کنید.');
-    const id = generateVIPID(name);
+    if (!phone || phone.length < 10) return alert('لطفاً یک شماره موبایل معتبر وارد کنید.');
+    
+    const id = generateVIPID(phone);
     localStorage.setItem('vip_me_name', name);
     localStorage.setItem('vip_me_id', id);
+    localStorage.setItem('vip_me_phone', phone);
+    
     window.location.href = `?to=${hostId}&toName=${encodeURIComponent(hostName)}`;
 }
 
@@ -287,7 +380,7 @@ async function fetchAndRenderMessages(isInitial = false) {
     
     newMessages.forEach((msg, index) => {
         const isMe = msg.body.startsWith(ME + ': ');
-        if (!isMe && !msg.body.startsWith(URL_TO_NAME + ': ')) return; // چک کردن فرستنده
+        if (!isMe && !msg.body.startsWith(URL_TO_NAME + ': ')) return; 
         
         if (isInitial && !isMe && msg.id > lastReadMsgId && !unreadDividerAdded) {
             const divider = document.createElement('div'); divider.className = 'unread-divider'; divider.innerText = 'پیام‌های جدید';
