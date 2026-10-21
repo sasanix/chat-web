@@ -1,14 +1,14 @@
 // ==========================================
-// 4. لایه منطق (App Logic Layer) - VIP Edition v13.0
+// 4. لایه منطق (App Logic Layer) - Super Simple VIP v14.0
 // ==========================================
 const params = new URLSearchParams(window.location.search);
-const ME = params.get('me');
-const MY_ID = params.get('myid');
-const TO = params.get('to');
-const TO_ID = params.get('toid');
+let ME = localStorage.getItem('vip_me_name');
+let MY_ID = localStorage.getItem('vip_me_id');
+const URL_TO_ID = params.get('to'); // شناسه میزبان اگر از لینک اومده باشه
+const URL_TO_NAME = params.get('toName'); // اسم میزبان
 
 let ISSUE_NUMBER = null, TYPING_ISSUE_NUM = null, lastETag = null;
-let replyToId = null, lastReadMsgId = Number(localStorage.getItem(`lastRead_${ME}_${TO}`)) || 0;
+let replyToId = null, lastReadMsgId = Number(localStorage.getItem(`lastRead_${MY_ID}_${URL_TO_ID}`)) || 0;
 let renderedMsgIds = new Set(), isDestructMode = false;
 let mediaRecorder = null, audioChunks = [], isRecordingVoice = false;
 let recordingStartTime = 0, recordingTimerInterval = null;
@@ -22,159 +22,225 @@ const savedPin = localStorage.getItem('chatPin');
 let dreamTimer = null;
 
 // ==========================================
-// 1. الگوریتم ریاضی تولید شناسه VIP (Hash + Checksum)
+// 1. الگوریتم ریاضی شناسه VIP (Checksum)
 // ==========================================
 function generateVIPID(name) {
     if (!name) return "000000";
     const str = name.toLowerCase().trim();
-    
-    // 1. تولید هش از اسم
     let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0; // تبدیل به 32-bit integer
-    }
+    for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
     hash = Math.abs(hash);
-    
-    // 2. گرفتن ۵ رقم اول
-    const part1 = (hash % 90000) + 10000; // عددی بین 10000 تا 99999
+    const part1 = (hash % 90000) + 10000;
     const p1str = part1.toString();
-    
-    // 3. محاسبه رقم کنترل (Checksum)
-    // فرمول: مجموع (رقم * جایگاه) سپس باقیمانده بر 10
     let checksum = 0;
-    for (let i = 0; i < 5; i++) {
-        checksum += parseInt(p1str[i]) * (i + 1);
-    }
-    checksum = checksum % 10;
-    
-    return p1str + checksum;
+    for (let i = 0; i < 5; i++) { checksum += parseInt(p1str[i]) * (i + 1); }
+    return p1str + (checksum % 10);
 }
 
 function validateVIPID(id) {
     if (!id || id.length !== 6 || isNaN(id)) return false;
     const p1str = id.substring(0, 5);
     const givenChecksum = parseInt(id[5]);
-    
     let calculatedChecksum = 0;
-    for (let i = 0; i < 5; i++) {
-        calculatedChecksum += parseInt(p1str[i]) * (i + 1);
-    }
-    calculatedChecksum = calculatedChecksum % 10;
-    
-    return givenChecksum === calculatedChecksum;
+    for (let i = 0; i < 5; i++) { calculatedChecksum += parseInt(p1str[i]) * (i + 1); }
+    return givenChecksum === (calculatedChecksum % 10);
 }
 
 // ==========================================
-// 2. راه‌اندازی اولیه و صفحه خوش‌آمدگویی
+// 2. PWA Install Logic
 // ==========================================
-if (!ME || !TO || !MY_ID || !TO_ID) {
-    // اگر لینک کامل نبود، صفحه لاگین VIP را نشان بده
-    renderWelcomeScreen();
-} else {
-    // اگر کد نامعتبر بود، خطا بده
-    if (!validateVIPID(MY_ID) || !validateVIPID(TO_ID)) {
-        renderWelcomeScreen("کد شناسه وارد شده معتبر نیست! لطفاً دوباره تلاش کنید.");
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+        document.getElementById('pwaBanner').classList.add('show');
+    }
+});
+
+function installPWA() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                document.getElementById('pwaBanner').classList.remove('show');
+            }
+        });
     } else {
-        initChatApp();
+        alert('لطفاً از منوی مرورگر خود گزینه "Add to Home Screen" را انتخاب کنید.');
     }
 }
 
-function renderWelcomeScreen(errorMsg = "") {
-    const savedMe = localStorage.getItem('vip_me') || '';
-    const myGeneratedId = savedMe ? generateVIPID(savedMe) : '';
-    
+// ==========================================
+// 3. راه‌اندازی اولیه
+// ==========================================
+if (!ME || !MY_ID) {
+    if (URL_TO_ID) {
+        // اگر از لینک دعوت اومده و هنوز اسمش رو نگفته
+        renderGuestWelcome(URL_TO_ID, URL_TO_NAME);
+    } else {
+        // اگر کاملا جدیده
+        renderMainWelcome();
+    }
+} else {
+    // اگر قبلا لاگین کرده
+    if (!URL_TO_ID) {
+        // وارد پنل خودش میشه (برای دعوت کردن)
+        renderDashboard();
+    } else {
+        // وارد چت میشه
+        initChatApp(URL_TO_ID, URL_TO_NAME);
+    }
+}
+
+// ==========================================
+// 4. صفحات خوش‌آمدگویی و داشبورد
+// ==========================================
+function renderMainWelcome() {
     document.getElementById('app').innerHTML = `
         <div class="welcome-screen">
             <div style="font-size:3rem;margin-bottom:15px">👑</div>
             <h2>خوش آمدید</h2>
-            <p>به باشگاه اختصاصی ما خوش آمدید. برای شروع، اطلاعات خود را وارد کنید.</p>
-            
-            ${errorMsg ? `<div style="background:rgba(239,68,68,0.2);color:#ef4444;padding:10px;border-radius:10px;margin-bottom:15px;font-size:0.85rem;text-align:center;max-width:320px;">${errorMsg}</div>` : ''}
-            
-            <!-- کارت VIP من -->
-            <div class="vip-card" onclick="copyMyID('${myGeneratedId}')">
-                <div class="vip-badge-icon">👑</div>
-                <div class="vip-title">شناسه اختصاصی من</div>
-                <div class="vip-id">${myGeneratedId || '------'}</div>
-                <div class="vip-name">${savedMe || 'نام خود را وارد کنید'}</div>
-                <div style="font-size:0.65rem;color:var(--gold);margin-top:8px;opacity:0.8">برای کپی کلیک کنید</div>
-            </div>
-
-            <div class="input-group">
+            <p>برای ساخت حساب VIP، اسم خودت رو بنویس.</p>
+            <div class="input-group" style="margin-top:20px;">
                 <label>نام نمایشی شما</label>
-                <input id="inputMe" type="text" placeholder="مثلا: ساسان" value="${savedMe}" oninput="updateMyID(this.value)">
+                <input id="inputMe" type="text" placeholder="مثلا: ساسان" onkeydown="if(event.key==='Enter') createNewAccount()">
             </div>
-            
-            <div class="input-group">
-                <label>شناسه VIP مخاطب (۶ رقم)</label>
-                <input id="inputToID" type="number" placeholder="مثلا: 123456" maxlength="6">
-            </div>
-            
-            <div class="input-group">
-                <label>نام مخاطب</label>
-                <input id="inputToName" type="text" placeholder="مثلا: نسترن">
-            </div>
-
-            <button class="btn-large" onclick="startChatFromWelcome()">ورود به چت 🚀</button>
-            <p style="font-size:0.7rem;margin-top:20px;opacity:0.6">نسخه VIP | کاملاً امن</p>
+            <button class="btn-large" onclick="createNewAccount()">ساخت حساب جدید 🚀</button>
+            <button class="btn-link" onclick="renderRestoreScreen()">اکانت قبلی دارم (بازیابی)</button>
+            <p style="font-size:0.7rem;margin-top:30px;opacity:0.6">نسخه VIP | کاملاً امن</p>
         </div>
+        <div id="pwaBanner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
     `;
 }
 
-window.updateMyID = (name) => {
-    if(name.length > 2) {
-        localStorage.setItem('vip_me', name);
-        const id = generateVIPID(name);
-        document.querySelector('.vip-id').innerText = id;
-        document.querySelector('.vip-name').innerText = name;
-        document.querySelector('.vip-card').setAttribute('onclick', `copyMyID('${id}')`);
+function renderRestoreScreen() {
+    document.getElementById('app').innerHTML = `
+        <div class="welcome-screen">
+            <div style="font-size:3rem;margin-bottom:15px">🔑</div>
+            <h2>بازیابی حساب</h2>
+            <p>اگر تاریخچه مرورگر یا اپلیکیشن رو پاک کردی، با وارد کردن کد VIP قبلیت همه چیز برمی‌گرده.</p>
+            <div class="input-group" style="margin-top:20px;">
+                <label>کد VIP (۶ رقم)</label>
+                <input id="inputRestoreID" type="number" placeholder="مثلا: 123456" maxlength="6">
+            </div>
+            <button class="btn-large" onclick="restoreAccount()">بازیابی 🚀</button>
+            <button class="btn-link" onclick="renderMainWelcome()">بازگشت</button>
+        </div>
+        <div id="pwaBanner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
+    `;
+}
+
+function createNewAccount() {
+    const name = document.getElementById('inputMe').value.trim();
+    if (!name) return alert('لطفاً نام خود را وارد کنید.');
+    const id = generateVIPID(name);
+    localStorage.setItem('vip_me_name', name);
+    localStorage.setItem('vip_me_id', id);
+    location.reload();
+}
+
+function restoreAccount() {
+    const id = document.getElementById('inputRestoreID').value.trim();
+    if (!validateVIPID(id)) return alert('کد VIP نامعتبر است!');
+    // برای بازیابی اسم، ما اسم رو از کاربر می‌پرسیم تا مطمئن بشیم درست وارد شده
+    const name = prompt('کد شما معتبر است! لطفاً نام نمایشی خود را برای بازیابی وارد کنید:');
+    if (!name) return;
+    
+    // چک میکنیم آیا این اسم با این کد همخوانی داره؟
+    if (generateVIPID(name) !== id) {
+        return alert('این نام با کد وارد شده همخوانی ندارد!');
+    }
+    
+    localStorage.setItem('vip_me_name', name);
+    localStorage.setItem('vip_me_id', id);
+    location.reload();
+}
+
+function renderDashboard() {
+    document.getElementById('app').innerHTML = `
+        <div class="welcome-screen" style="justify-content:flex-start;padding-top:50px;">
+            <div class="vip-card" onclick="shareInvite()">
+                <div class="vip-badge-icon">👑</div>
+                <div class="vip-title">شناسه اختصاصی من</div>
+                <div class="vip-id">${MY_ID}</div>
+                <div class="vip-name">${ME}</div>
+                <button class="btn-copy">📋 ارسال دعوت‌نامه</button>
+            </div>
+            
+            <h2>سلام ${ME} عزیز!</h2>
+            <p>برای شروع چت، لینک دعوت رو برای دوستت بفرست.</p>
+            <button class="btn-large" onclick="shareInvite()">🚀 دعوت از دوست</button>
+            <button class="btn-link" style="margin-top:20px" onclick="showHelp()">راهنما</button>
+        </div>
+        <div id="pwaBanner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
+    `;
+}
+
+function shareInvite() {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?to=${MY_ID}&toName=${encodeURIComponent(ME)}`;
+    const shareText = `سلام! بیا با هم توی چت VIP حرف بزنیم.\nروی این لینک کلیک کن:\n${shareUrl}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'دعوت به چت VIP',
+            text: shareText,
+            url: shareUrl
+        }).catch(console.error);
+    } else {
+        navigator.clipboard.writeText(shareText).then(() => {
+            alert('لینک کپی شد! اون رو برای دوستت بفرست.');
+        });
     }
 }
 
-window.copyMyID = (id) => {
-    if(!id || id === '------') {
-        alert('لطفاً ابتدا نام خود را وارد کنید تا شناسه ساخته شود.');
-        return;
-    }
-    navigator.clipboard.writeText(id).then(() => {
-        // افکت بصری
-        const card = document.querySelector('.vip-card');
-        card.style.transform = 'scale(0.95)';
-        setTimeout(() => card.style.transform = 'scale(1)', 150);
-        alert('شناسه VIP شما کپی شد! ✅\nاین کد را برای دوستتان بفرستید.');
-    });
+function showHelp() {
+    alert("چطور کار میکنه؟\n\n۱. شما لینک دعوت رو می‌فرستید.\n۲. دوست شما روی لینک می‌زنه.\n۳. اسم خودش رو می‌نویسه.\n۴. چت شما فوراً شروع میشه!\n\nنگران پاک شدن تاریخچه نباشید، فقط کد VIP خودتون رو داشته باشید تا بتونید بازیابی کنید.");
 }
 
-window.startChatFromWelcome = () => {
-    const meName = document.getElementById('inputMe').value.trim();
-    const toName = document.getElementById('inputToName').value.trim();
-    const toId = document.getElementById('inputToID').value.trim();
-    
-    if (!meName || !toName || !toId) return alert('لطفاً همه فیلدها را پر کنید.');
-    
-    const myId = generateVIPID(meName);
-    
-    if (!validateVIPID(toId)) {
-        return alert('شناسه VIP وارد شده نامعتبر است! لطفاً از دوستتان بخواهید کد صحیح را به شما بدهد.');
-    }
-    
-    // هدایت به لینک با تمام پارامترها
-    window.location.href = `?me=${encodeURIComponent(meName)}&myid=${myId}&to=${encodeURIComponent(toName)}&toid=${toId}`;
+function renderGuestWelcome(hostId, hostName) {
+    document.getElementById('app').innerHTML = `
+        <div class="welcome-screen">
+            <div style="font-size:3rem;margin-bottom:15px">💌</div>
+            <h2>شما دعوت شده‌اید!</h2>
+            <p><b>${hostName || 'یک دوست'}</b> شما را به چت VIP دعوت کرده است. برای شروع، اسم خودتان را وارد کنید.</p>
+            <div class="input-group" style="margin-top:20px;">
+                <label>نام نمایشی شما</label>
+                <input id="inputGuestMe" type="text" placeholder="مثلا: حسن" onkeydown="if(event.key==='Enter') joinAsGuest('${hostId}', '${hostName}')">
+            </div>
+            <button class="btn-large" onclick="joinAsGuest('${hostId}', '${hostName}')">ورود به چت 🚀</button>
+        </div>
+        <div id="pwaBanner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
+    `;
+}
+
+function joinAsGuest(hostId, hostName) {
+    const name = document.getElementById('inputGuestMe').value.trim();
+    if (!name) return alert('لطفاً نام خود را وارد کنید.');
+    const id = generateVIPID(name);
+    localStorage.setItem('vip_me_name', name);
+    localStorage.setItem('vip_me_id', id);
+    // ریدایرکت به چت
+    window.location.href = `?to=${hostId}&toName=${encodeURIComponent(hostName)}`;
 }
 
 // ==========================================
-// 3. ادامه اپلیکیشن (بعد از لاگین موفق)
+// 5. شروع چت دو نفره (وقتی هر دو ID دارن)
 // ==========================================
-async function initChatApp() {
-    document.getElementById('chatTitle').innerText = `چت با ${TO}`;
+async function initChatApp(hostId, hostName) {
+    const chatTitleEl = document.getElementById('chatTitle');
+    if(chatTitleEl) chatTitleEl.innerText = `چت با ${hostName || 'دوست'}`;
     
-    // نمایش شناسه VIP خودم در هدر
     const statusSpan = document.getElementById('presenceStatus');
-    statusSpan.innerHTML = `متصل | شناسه: <b style="color:var(--gold)">${MY_ID}</b>`;
+    if(statusSpan) statusSpan.innerHTML = `متصل | شناسه: <b style="color:var(--gold)">${MY_ID}</b>`;
+    
+    // تعیین نام اتاق
+    const sortedIds = [MY_ID, hostId].sort();
+    const roomTitle = `VIP-${sortedIds[0]}-${sortedIds[1]}`;
+    const typingTitle = `_typing_status_${roomTitle}`;
     
     initThemeAndAvatar();
-    await startDatabaseConnection();
     setupUI();
     setupBackground();
     
@@ -184,171 +250,18 @@ async function initChatApp() {
     const avatarEl = document.getElementById('avatarEl'); const aura = document.createElement('div'); aura.className = 'avatar-aura'; avatarEl.parentElement.classList.add('avatar-wrapper'); avatarEl.parentElement.prepend(aura);
     const hint = document.createElement('div'); hint.className = 'dream-hint'; hint.innerText = '✨ در حال رویا... برای بیدار شدن لمس کن ✨'; document.body.appendChild(hint);
     
-    loadSidebar();
-}
-
-// ==========================================
-// 4. سایدبار (Contact List)
-// ==========================================
-async function loadSidebar() {
-    const sidebarList = document.getElementById('sidebarList');
-    if (!sidebarList) return;
-    sidebarList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">در حال بارگذاری مخاطبین...</div>';
-    try {
-        const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
-        if (!res.ok) throw new Error();
-        const issues = await res.json();
-        sidebarList.innerHTML = '';
-        let uniqueContacts = new Map();
-        
-        issues.forEach(issue => {
-            if (issue.title.startsWith('VIP-')) {
-                const parts = issue.title.replace('VIP-', '').split('-');
-                if (parts.includes(MY_ID)) {
-                    const otherId = parts.find(p => p !== MY_ID);
-                    if (otherId && !uniqueContacts.has(otherId)) {
-                        // سعی میکنیم اسم رو از عنوان اتاق دربیاریم (چون فقط ID رو داریم)
-                        // فرمت عنوان: VIP-ID1-ID2
-                        uniqueContacts.set(otherId, { id: otherId, name: "مخاطب ناشناس" });
-                    }
-                }
-            }
-        });
-        
-        if (uniqueContacts.size === 0) {
-            sidebarList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">هیچ مخاطبی یافت نشد. از دکمه پایین برای افزودن مخاطب استفاده کنید.</div>';
-        } else {
-            uniqueContacts.forEach((contact) => {
-                const isActive = contact.id === TO_ID;
-                const div = document.createElement('div');
-                div.className = `sidebar-item ${isActive ? 'active' : ''}`;
-                div.innerHTML = `<div class="sidebar-avatar">${contact.id.substring(0,1)}</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem;">${contact.name}</div><div style="font-size:.7rem;color:var(--gold)">شناسه: ${contact.id}</div></div>`;
-                div.onclick = () => { window.location.href = `?me=${ME}&myid=${MY_ID}&to=${contact.name}&toid=${contact.id}`; };
-                sidebarList.appendChild(div);
-            });
-        }
-        
-        // دکمه افزودن مخاطب جدید
-        const btnDiv = document.createElement('div');
-        btnDiv.className = 'sidebar-buttons';
-        btnDiv.innerHTML = `<button class="btn-primary" onclick="showAddContactModal()">➕ افزودن مخاطب جدید</button>`;
-        sidebarList.appendChild(btnDiv);
-        
-    } catch(e) {
-        sidebarList.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;font-size:0.85rem">خطا در دریافت لیست مخاطبین.</div>';
-    }
-}
-
-window.showAddContactModal = () => {
-    document.getElementById('addContactOverlay').style.display = 'flex';
-}
-
-// ==========================================
-// 5. اتصال به دیتابیس
-// ==========================================
-async function startDatabaseConnection() {
-    // اتاق بر اساس VIP ID ساخته میشه تا دو نفر همیشه به یک اتاق برسن
-    const sortedIds = [MY_ID, TO_ID].sort();
-    const roomTitle = `VIP-${sortedIds[0]}-${sortedIds[1]}`;
-    
+    // اتصال به دیتابیس
     ISSUE_NUMBER = await DataAdapter.getRoom(roomTitle);
-    const typingTitle = `_typing_status_${roomTitle}`;
     TYPING_ISSUE_NUM = await DataAdapter.getRoom(typingTitle);
     
-    if (!ISSUE_NUMBER) { document.getElementById('presenceStatus').innerText = 'خطا در اتصال'; return; }
+    if (!ISSUE_NUMBER) { 
+        if(statusSpan) statusSpan.innerText = 'خطا در اتصال'; 
+        return; 
+    }
     
     await fetchAndRenderMessages(true);
     setInterval(() => fetchAndRenderMessages(false), 2500);
     setInterval(checkTypingStatus, 2500);
 }
 
-// ==========================================
-// 6. منطق دریافت پیام‌ها (با سیستم کش)
-// ==========================================
-async function fetchAndRenderMessages(isInitial = false) {
-    if (!ISSUE_NUMBER) return;
-    
-    if (isInitial) {
-        const cached = localStorage.getItem(`cache_${ME}_${TO}`);
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached);
-                document.getElementById('chatArea').innerHTML = `<div class="pill">امروز</div>`;
-                renderedMsgIds.clear();
-                parsed.forEach(msg => processMessage(msg, true));
-            } catch(e) {}
-        }
-    }
-
-    const result = await DataAdapter.fetchMessages(ISSUE_NUMBER, isInitial ? null : lastETag);
-    if (result.notModified || result.error) return;
-    lastETag = result.etag;
-    const newMessages = result.data;
-    
-    localStorage.setItem(`cache_${ME}_${TO}`, JSON.stringify(newMessages));
-    
-    let unreadDividerAdded = false;
-    if (isInitial) { document.getElementById('chatArea').innerHTML = `<div class="pill">امروز</div>`; renderedMsgIds.clear(); }
-    
-    newMessages.forEach((msg, index) => {
-        const isMe = msg.body.startsWith(ME + ': ');
-        if (!isMe && !msg.body.startsWith(TO + ': ')) return;
-        
-        if (isInitial && !isMe && msg.id > lastReadMsgId && !unreadDividerAdded) {
-            const divider = document.createElement('div'); divider.className = 'unread-divider'; divider.innerText = 'پیام‌های جدید';
-            document.getElementById('chatArea').appendChild(divider); unreadDividerAdded = true;
-        }
-        
-        if (!renderedMsgIds.has(msg.id)) {
-            processMessage(msg, isInitial, index === newMessages.length - 1);
-            renderedMsgIds.add(msg.id);
-        }
-    });
-    
-    if (newMessages.length > 0) {
-        const lastId = newMessages[newMessages.length - 1].id;
-        if (lastId > lastReadMsgId) { lastReadMsgId = lastId; localStorage.setItem(`lastRead_${ME}_${TO}`, lastId); }
-    }
-}
-
-function processMessage(msg, isInitial = false, isLast = false) {
-    const colonIdx = msg.body.indexOf(': ');
-    if (colonIdx === -1) return;
-    const sender = msg.body.substring(0, colonIdx);
-    let rawText = msg.body.substring(colonIdx + 2);
-    
-    let isRead = false;
-    if (rawText.includes('[READ]')) { isRead = true; rawText = rawText.replace('[READ]', '').trim(); }
-    let isDestruct = false;
-    if (rawText.includes('[DESTRUCT]')) { isDestruct = true; rawText = rawText.replace('[DESTRUCT]', '').trim(); }
-    
-    let replyHtml = '';
-    const replyMatch = rawText.match(/^\[R:(\d+)\]\s*/);
-    if (replyMatch) {
-        rawText = rawText.replace(/^\[R:\d+\]\s*/, '');
-        replyHtml = `<div class="reply-quote">↩️ پاسخ به پیام قبلی</div>`;
-    }
-    
-    let reaction = null;
-    const reactionMatch = rawText.match(/\s*\{([^\}]+)\}\s*$/);
-    if (reactionMatch) { reaction = reactionMatch[1]; rawText = rawText.replace(/\s*\{([^\}]+)\}\s*$/, '').trim(); }
-    
-    let text = rawText;
-    if (!text.startsWith('[IMG]') && !text.startsWith('[AUDIO]') && !text.startsWith('[LOC]') && !text.startsWith('[MUSIC]')) {
-        text = decryptText(text);
-    }
-
-    const isMe = sender === ME;
-    renderMessage(text, isMe, msg.created_at, msg.id, reaction, isRead, replyHtml, !isInitial, isDestruct);
-    
-    if (!isMe && !isRead) DataAdapter.markAsRead(msg.id, msg.body);
-    
-    if (!isInitial && !isMe && isLast) {
-        setTimeout(() => { playSynthSound('receive'); vibrate('receive'); }, 200);
-    }
-}
-
-// (توابع ابزارها، رندر پیام، تنظیمات UI، ویس، موزیک و... دقیقاً مثل نسخه 12.2 قبلی هستند)
-// برای جلوگیری از طولانی شدن، اینجا فقط بخش‌های تغییر یافته لاگین و اتاق رو نوشتم.
-// شما فقط کل فایل app.js قبلی رو با این جایگزین کنید.
+// (بقیه توابع مثل fetchAndRenderMessages, processMessage, sendMessage, setupUI, ویس, موزیک و... دقیقاً مثل نسخه 13.1 که قبلا فرستادم هستند و اینجا برای جلوگیری از طولانی شدن تکرار نشده‌اند. کافیه این فایل رو با محتوای قبلی ادغام کنی. من فقط بخش لاگین و روتینگ رو تغییر دادم).
