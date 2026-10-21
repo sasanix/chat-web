@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3670/3670051.png">
 </head>
 <body>
 <div id="app">
@@ -35,14 +34,6 @@
 
     <div id="searchBox">
         <input type="text" id="searchInput" placeholder="جستجو در پیام‌ها..." oninput="filterMessages()">
-    </div>
-
-    <div id="sidebar">
-        <div class="sidebar-header">
-            <h3>لیست مخاطبین</h3>
-            <button class="sidebar-close-btn" onclick="toggleSidebar()">✖</button>
-        </div>
-        <div class="sidebar-list" id="sidebarList"></div>
     </div>
 
     <div id="chatArea">
@@ -84,25 +75,6 @@
         </div>
     </div>
 
-    <!-- Modal: Add Contact -->
-    <div id="addContactOverlay" class="modal-screen" style="display:none; background:rgba(0,0,0,0.8); z-index:400;">
-        <div style="background:var(--app-bg); padding:25px; border-radius:20px; width:90%; max-width:350px; border:1px solid var(--border);">
-            <h2 style="text-align:center; margin-bottom:20px;">افزودن مخاطب جدید</h2>
-            <div class="input-group">
-                <label>شناسه VIP مخاطب (۶ رقم)</label>
-                <input id="modalToID" type="number" placeholder="مثلا: 123456" maxlength="6">
-            </div>
-            <div class="input-group">
-                <label>نام مخاطب</label>
-                <input id="modalToName" type="text" placeholder="مثلا: نسترن">
-            </div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn-large" style="background:var(--input-bg); color:var(--text);" onclick="document.getElementById('addContactOverlay').style.display='none'">انصراف</button>
-                <button class="btn-large" onclick="addContactFromModal()">شروع چت</button>
-            </div>
-        </div>
-    </div>
-
     <div id="musicSearchOverlay" onclick="if(event.target.id==='musicSearchOverlay') closeMusicSearch()">
         <div class="music-modal-content">
             <div class="music-modal-header">
@@ -114,7 +86,7 @@
                 <button onclick="doMusicSearch()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-weight:600;cursor:pointer;font-family:inherit;font-size:.95rem">🔍 جستجو</button>
             </div>
             <div id="musicSearchResults">
-                <div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.9rem">اسم آهنگ یا خواننده رو بنویس و جستجو کن 🎵</div>
+                <div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.9rem">اسم آهنگ رو بنویس و جستجو کن 🎵</div>
             </div>
         </div>
     </div>
