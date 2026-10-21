@@ -16,10 +16,15 @@ const CONFIG = {
         SELF_DESTRUCT: true,
         PREMIUM_MODE: false
     },
-    // ⚠️ شماره موبایل و رمز ادمین (این‌ها رو حتماً عوض کن)
+    // ⚠️ شماره موبایل و رمز ادمین
     ADMIN_PHONE: '09172837749', 
-    ADMIN_PASSWORD: 'YourStrongPassword', // ⬅️ اینجا یه رمز قوی بذار (مثلا Sasan@2026)
+    ADMIN_PASSWORD: 'YourStrongPassword', 
+    ADMIN_NAME: 'مهدی بازیار',
+    SUPPORT_PHONE: '09932229751',
+    CARD_NUMBER: '6219861880382741',
+    SHABA_NUMBER: 'IR040560611828006294220902',
+    CREATION_DATE: '۲۹ مهر ۱۴۰۵',
     
     APP_NAME: 'چت VIP',
-    VERSION: '15.2-Secure'
+    VERSION: '15.5-Final'
 };
