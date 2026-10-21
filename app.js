@@ -1,5 +1,5 @@
 // ==========================================
-// 4. لایه منطق (App Logic Layer) - Complete Final Version
+// 4. لایه منطق (App Logic Layer) - Final Clean Version
 // ==========================================
 const params = new URLSearchParams(window.location.search);
 let ME = localStorage.getItem('vip_me_name');
@@ -20,7 +20,6 @@ let audioCtx = null, isMusicPlaying = false, chordInterval = null, analyser = nu
 const chords = [[261.63, 329.63, 392.00, 493.88], [220.00, 261.63, 329.63, 392.00], [174.61, 220.00, 261.63, 329.63], [196.00, 246.94, 293.66, 349.23]];
 let chordIdx = 0, pinBuffer = '';
 const savedPin = localStorage.getItem('chatPin');
-let dreamTimer = null;
 
 // ==========================================
 // 1. الگوریتم ریاضی و هش اصالت
@@ -362,7 +361,6 @@ async function initChatApp(hostId, hostName) {
     const ambientLayer = document.createElement('div'); ambientLayer.id = 'ambientLayer'; document.getElementById('app').prepend(ambientLayer);
     const avatarEl = document.getElementById('avatarEl'); 
     if(avatarEl) { const aura = document.createElement('div'); aura.className = 'avatar-aura'; avatarEl.parentElement.classList.add('avatar-wrapper'); avatarEl.parentElement.prepend(aura); }
-    const hint = document.createElement('div'); hint.className = 'dream-hint'; hint.innerText = '✨ در حال رویا... برای بیدار شدن لمس کن ✨'; document.body.appendChild(hint);
     
     ISSUE_NUMBER = await DataAdapter.getRoom(roomTitle);
     TYPING_ISSUE_NUM = await DataAdapter.getRoom(typingTitle);
@@ -610,19 +608,27 @@ window.doMusicSearch = async () => {
     const query = document.getElementById('musicSearchInput').value.trim(); if (!query) return;
     const resultsDiv = document.getElementById('musicSearchResults'); resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">⏳ در حال جستجو...</div>';
     try {
-        const res = await fetch(`https://jiosaavn-api-private.vercel.app/search/songs?query=${encodeURIComponent(query)}&limit=10`);
-        const result = await res.json();
-        if (!result.data || !result.data.results || result.data.results.length === 0) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">نتیجه‌ای یافت نشد 😔</div>'; return; }
+        // استفاده از API جایگزین (Invidious) که در ایران بهتر کار میکنه
+        const res = await fetch(`https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(query)}&type=video`);
+        const data = await res.json();
+        
+        if (!data || data.length === 0) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">نتیجه‌ای یافت نشد 😔</div>'; return; }
+        
         resultsDiv.innerHTML = ''; let count = 0;
-        result.data.results.forEach((track) => {
-            if (!track.downloadUrl || track.downloadUrl.length === 0) return; count++;
-            let audioUrl = ''; for(let i = track.downloadUrl.length - 1; i >= 0; i--) { if(track.downloadUrl[i].quality === '320kbps' || track.downloadUrl[i].quality === '160kbps') { audioUrl = track.downloadUrl[i].link; break; } } if(!audioUrl) audioUrl = track.downloadUrl[track.downloadUrl.length - 1].link;
+        data.slice(0, 10).forEach((track) => {
+            if (!track.videoId) return; count++;
             const div = document.createElement('div'); div.className = 'music-result-item';
-            div.innerHTML = `<img src="${track.image[0].link}" class="music-result-art"><div class="music-result-info"><div class="music-result-title">${escapeHtml(track.name || '')}</div><div class="music-result-artist">${escapeHtml(track.primaryArtists || '')}</div></div><div class="music-result-actions"><button class="play-btn" data-url="${audioUrl}">▶️</button><button class="send-btn-sm" style="background:linear-gradient(135deg,var(--accent),#a855f7);color:white">📤</button></div>`;
+            div.innerHTML = `<img src="${track.videoThumbnails[0].url}" class="music-result-art"><div class="music-result-info"><div class="music-result-title">${escapeHtml(track.title || '')}</div><div class="music-result-artist">${escapeHtml(track.author || '')}</div></div><div class="music-result-actions"><button class="play-btn" data-idx="${track.videoId}">▶️</button><button class="send-btn-sm" style="background:linear-gradient(135deg,var(--accent),#a855f7);color:white">📤</button></div>`;
             resultsDiv.appendChild(div);
+            
             const playBtn = div.querySelector('.play-btn'); const sendBtn = div.querySelector('.send-btn-sm');
-            playBtn.addEventListener('click', () => { if (currentPreviewAudio) { currentPreviewAudio.pause(); document.querySelectorAll('.play-btn').forEach(b => b.innerText = '▶️'); } if (currentPreviewAudio && currentPreviewAudio.src === audioUrl) { currentPreviewAudio = null; return; } const audio = new Audio(audioUrl); audio.play(); currentPreviewAudio = audio; playBtn.innerText = '⏸'; audio.onended = () => { playBtn.innerText = '▶️'; currentPreviewAudio = null; }; });
-            sendBtn.addEventListener('click', () => { const safeTitle = (track.name || '').replace(/\|\|\|/g, '').replace(/\n/g, ' '); const safeArtist = (track.primaryArtists || '').replace(/\|\|\|/g, '').replace(/\n/g, ' '); sendMessage(`[MUSIC]${audioUrl}|||${safeTitle}|||${safeArtist}|||${track.image[0].link}`); window.closeMusicSearch(); });
+            playBtn.addEventListener('click', () => { window.open(`https://youtube.com/watch?v=${track.videoId}`, '_blank'); });
+            sendBtn.addEventListener('click', () => { 
+                const safeTitle = (track.title || '').replace(/\|\|\|/g, '').replace(/\n/g, ' '); 
+                const safeArtist = (track.author || '').replace(/\|\|\|/g, '').replace(/\n/g, ' '); 
+                sendMessage(`[MUSIC]${track.videoId}|||${safeTitle}|||${safeArtist}|||${track.videoThumbnails[0].url}`); 
+                window.closeMusicSearch(); 
+            });
         });
         if (count === 0) resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">آهنگی پیدا نشد.</div>';
     } catch(e) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444">خطا در جستجو. لطفا اتصال اینترنت را بررسی کنید.</div>'; }
@@ -687,18 +693,6 @@ function playChord() {
         osc.connect(filter); filter.connect(gain); gain.connect(analyser); osc.start(now + i * 0.1); osc.stop(now + 4);
     });
 }
-function resetDreamTimer() { clearTimeout(dreamTimer); document.body.classList.remove('dream-mode'); dreamTimer = setTimeout(() => { document.body.classList.add('dream-mode'); }, 60000); }
-['touchstart', 'mousedown', 'keydown', 'scroll'].forEach(evt => { document.addEventListener(evt, resetDreamTimer, { passive: true }); });
-resetDreamTimer();
-function updateCircadianAmbient() {
-    const hour = new Date().getHours(); const root = document.documentElement;
-    if (hour >= 5 && hour < 10) { root.style.setProperty('--ambient-1', '#fbbf24'); root.style.setProperty('--ambient-2', '#f59e0b'); root.style.setProperty('--accent', '#f59e0b'); }
-    else if (hour >= 10 && hour < 16) { root.style.setProperty('--ambient-1', '#38bdf8'); root.style.setProperty('--ambient-2', '#0ea5e9'); root.style.setProperty('--accent', '#0ea5e9'); }
-    else if (hour >= 16 && hour < 20) { root.style.setProperty('--ambient-1', '#f97316'); root.style.setProperty('--ambient-2', '#a855f7'); root.style.setProperty('--accent', '#a855f7'); }
-    else { root.style.setProperty('--ambient-1', '#1e1b4b'); root.style.setProperty('--ambient-2', '#312e81'); root.style.setProperty('--accent', '#6366f1'); }
-}
-updateCircadianAmbient();
-setInterval(updateCircadianAmbient, 60000);
 
 async function openAdminPanel() {
     const enteredPassword = prompt('🔐 برای ورود به پنل مدیریت، رمز عبور خود را وارد کنید:');
@@ -780,4 +774,4 @@ async function viewAdminChat(roomNumber, roomTitle) {
         });
         chatArea.scrollTop = chatArea.scrollHeight;
     } catch(e) { document.getElementById('adminChatArea').innerHTML = '<div style="color:#ef4444;">خطا در دریافت پیام‌ها.</div>'; }
-                    }
+}
