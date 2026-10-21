@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>چت افسانه‌ای</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3670/3670051.png">
 <style>
 :root {
   --bg: #04050a; --app-bg: rgba(13,17,35,0.6); --border: rgba(255,255,255,0.06);
@@ -890,5 +893,10 @@ function renderParticles(){
 }
 renderParticles();
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
 </body>
-  </html>
+                                                                                   </html>
