@@ -10,12 +10,12 @@ const CONFIG = {
         REPO: 'chat-db'
     },
     FEATURES: {
-        E2EE: true,          // رمزنگاری سرتاسری
-        MUSIC: true,         // استودیو موزیک
-        VOICE: true,         // پیام صوتی
-        SELF_DESTRUCT: true, // پیام خودتخریب
-        PREMIUM_MODE: false  // نسخه پولی
+        E2EE: true,
+        MUSIC: true,
+        VOICE: true,
+        SELF_DESTRUCT: true,
+        PREMIUM_MODE: false
     },
-    APP_NAME: 'چت افسانه‌ای',
-    VERSION: '11.0-Ultimate'
+    APP_NAME: 'چت VIP',
+    VERSION: '14.0-Cloud'
 };
