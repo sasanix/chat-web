@@ -1,5 +1,5 @@
 /* ==========================================
-   3. لایه ظاهر (UI Layer) - VIP Edition v13.0
+   3. لایه ظاهر (UI Layer)
    ========================================== */
 :root {
   --bg: #04050a; --app-bg: rgba(13,17,35,0.6); --border: rgba(255,255,255,0.06);
@@ -8,7 +8,6 @@
   --bubble-other: linear-gradient(145deg,rgba(30,41,59,.9),rgba(15,23,42,.95));
   --input-bg: rgba(30,41,59,.5); --meta-text: #e2e8f0;
   --ambient-1: #1e1b4b; --ambient-2: #312e81; --accent: #6366f1;
-  --aura: rgba(99,102,241,0.6);
   --gold: #fbbf24;
 }
 [data-theme="light"] {
@@ -31,7 +30,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .avatar-wrapper{position:relative;display:flex;align-items:center;justify-content:center}
 .avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;border:2px solid rgba(255,255,255,.2);cursor:pointer;transition:transform .2s;position:relative;z-index:2}
 .avatar:active{transform:scale(.9)}
-.avatar-aura{position:absolute;inset:-8px;border-radius:50%;background:radial-gradient(circle, var(--aura) 0%, transparent 70%);opacity:0.5;animation:auraBreath 4s ease-in-out infinite;z-index:1;pointer-events:none}
+.avatar-aura{position:absolute;inset:-8px;border-radius:50%;background:radial-gradient(circle, var(--accent) 0%, transparent 70%);opacity:0.5;animation:auraBreath 4s ease-in-out infinite;z-index:1;pointer-events:none}
 @keyframes auraBreath{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.3);opacity:0.7}}
 .avatar-wrapper.typing .avatar-aura{animation:auraBreath 0.8s ease-in-out infinite;background:radial-gradient(circle, #38bdf8 0%, transparent 70%)}
 .status h3{font-size:1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
@@ -102,7 +101,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .emoji-rain{position:fixed;top:-50px;font-size:2rem;pointer-events:none;z-index:9999;animation:fall linear forwards}
 @keyframes fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}
 
-/* Sidebar */
+/* Sidebar & Modals */
 #sidebar{position:absolute;top:0;right:-300px;width:280px;height:100%;background:var(--header-bg);backdrop-filter:blur(25px);border-left:1px solid var(--border);z-index:100;transition:right .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,0.3)}
 #sidebar.open{right:0}
 .sidebar-header{padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
@@ -122,7 +121,6 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 #searchBox{display:none;padding:10px 16px;background:var(--header-bg);border-bottom:1px solid var(--border);position:absolute;top:73px;width:100%;z-index:9}
 #searchBox input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);outline:none;font-family:inherit}
 
-/* Music Search Modal */
 #musicSearchOverlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:150;display:none;flex-direction:column;padding:20px}
 .music-modal-content{background:var(--header-bg);border:1px solid var(--border);border-radius:20px;padding:16px;display:flex;flex-direction:column;height:100%;max-height:85vh;margin-top:auto;margin-bottom:auto}
 .music-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
@@ -156,7 +154,6 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
 .typing-dots span{width:4px;height:4px;background-color:#38bdf8;border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}
 .typing-dots span:nth-child(1){animation-delay:-0.32s}.typing-dots span:nth-child(2){animation-delay:-0.16s}
 @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
-
 .emoji-picker-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(5px);z-index:90;display:none;justify-content:center;align-items:center}
 .emoji-picker-modal{background:var(--header-bg);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;flex-wrap:wrap;gap:15px;max-width:300px;justify-content:center}
 .emoji-picker-modal span{font-size:2rem;cursor:pointer;transition:transform .2s}
@@ -182,6 +179,7 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
     animation: goldGlow 3s ease-in-out infinite alternate;
+    cursor: pointer;
 }
 @keyframes goldGlow {
     0% { box-shadow: 0 10px 30px rgba(251, 191, 36, 0.1); }
@@ -204,11 +202,12 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
 .vip-id { font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: 5px; margin-bottom: 5px; font-family: monospace; text-shadow: 0 0 10px rgba(251,191,36,0.8); }
 .vip-name { font-size: 0.9rem; color: var(--text-muted); }
 .vip-badge-icon { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; filter: drop-shadow(0 0 5px gold); }
+.btn-copy { background: var(--gold); color: #000; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: inherit; }
 
 /* Welcome & Modals */
 .welcome-screen, .modal-screen {
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    height: 100%; padding: 30px; background: var(--app-bg); backdrop-filter: blur(30px); z-index: 300; position: absolute; inset: 0;
+    height: 100%; padding: 30px 30px 100px 30px; background: var(--app-bg); backdrop-filter: blur(30px); z-index: 300; position: absolute; inset: 0; overflow-y: auto;
 }
 .welcome-screen h2, .modal-screen h2 { color: var(--text); margin-bottom: 8px; font-size: 1.6rem; }
 .welcome-screen p, .modal-screen p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; text-align: center; }
@@ -216,8 +215,21 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
 .input-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; margin-right: 5px; }
 .input-group input { width: 100%; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 1rem; outline: none; font-family: inherit; transition: border-color .3s; }
 .input-group input:focus { border-color: var(--accent); }
-.btn-large { width: 100%; max-width: 320px; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--accent), #ec4899); color: white; font-size: 1.05rem; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 10px 20px rgba(99,102,241,0.3); transition: transform .2s; }
+.btn-large { width: 100%; max-width: 320px; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--accent), #ec4899); color: white; font-size: 1.05rem; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 10px 20px rgba(99,102,241,0.3); transition: transform .2s; margin-top: 10px; }
 .btn-large:active { transform: scale(0.97); }
+.btn-link { background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; text-decoration: underline; margin-top: 15px; font-family: inherit; }
+
+/* PWA Install Banner */
+#pwaBanner {
+    position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, rgba(99,102,241,0.95), rgba(168,85,247,0.95));
+    color: white; padding: 12px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: bold;
+    display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 1000; opacity: 0; transition: all .5s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;
+}
+#pwaBanner.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+#pwaBanner button { background: white; color: var(--accent); border: none; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-family: inherit; cursor: pointer; }
 
 /* Dream Mode */
 body.dream-mode #chatArea{filter:saturate(0.6) brightness(0.85);transition:filter 2s ease}
