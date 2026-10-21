@@ -3,40 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>چت دو نفره</title>
+<title>چت حرفه‌ای</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif}
-body,html{width:100%;height:100dvh;overflow:hidden;background:#060814;color:#f1f5f9;display:flex;justify-content:center;align-items:center}
-#app{width:100%;max-width:440px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden;background:rgba(13,17,35,0.7);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 25px 50px -12px rgba(0,0,0,0.7)}
+body,html{width:100%;height:100dvh;overflow:hidden;background:#04050a;color:#f1f5f9;display:flex;justify-content:center;align-items:center}
+#app{width:100%;max-width:440px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden;background:rgba(13,17,35,0.6);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,0.06);box-shadow:0 30px 60px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1)}
 canvas#bgCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-.grain{position:absolute;inset:0;z-index:1;opacity:.035;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")}
-.orb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;animation:floatOrb 14s ease-in-out infinite alternate}
-.orb-1{width:220px;height:220px;background:radial-gradient(circle,rgba(99,102,241,.35),transparent 70%);top:-40px;left:-40px}
-.orb-2{width:260px;height:260px;background:radial-gradient(circle,rgba(236,72,153,.25),transparent 70%);bottom:60px;right:-50px;animation-delay:-6s}
-.orb-3{width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,.25),transparent 70%);top:45%;left:25%;animation-delay:-3s}
-@keyframes floatOrb{0%{transform:translate(0,0) scale(1)}50%{transform:translate(15px,25px) scale(1.05)}100%{transform:translate(-10px,-15px) scale(.95)}}
-header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(15,23,42,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07)}
-.user-info{display:flex;align-items:center;gap:12px}
-.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:700;color:#fff;box-shadow:0 0 15px rgba(99,102,241,.4);border:1.5px solid rgba(255,255,255,.2);position:relative}
-.status h3{font-size:.98rem;font-weight:600;color:#f8fafc}
-.status span{font-size:.74rem;color:#38bdf8;display:flex;align-items:center;gap:4px}
-#chatArea{position:relative;z-index:2;flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
-#chatArea::-webkit-scrollbar{width:4px}
-#chatArea::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
-.pill{align-self:center;background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:4px 12px;font-size:.72rem;color:#94a3b8;backdrop-filter:blur(8px)}
-.enc-notice{align-self:center;text-align:center;max-width:85%;font-size:.72rem;color:#fbbf24;background:rgba(245,158,11,.1);border:1px dashed rgba(245,158,11,.3);padding:6px 12px;border-radius:10px;display:flex;align-items:center;gap:6px}
-.msg-wrap{display:flex;flex-direction:column;align-items:flex-start;max-width:86%;position:relative;touch-action:pan-y}
+.grain{position:absolute;inset:0;z-index:1;opacity:.04;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:floatOrb 16s ease-in-out infinite alternate}
+.orb-1{width:250px;height:250px;background:radial-gradient(circle,rgba(99,102,241,.4),transparent 70%);top:-60px;left:-60px}
+.orb-2{width:300px;height:300px;background:radial-gradient(circle,rgba(236,72,153,.3),transparent 70%);bottom:80px;right:-80px;animation-delay:-8s}
+.orb-3{width:200px;height:200px;background:radial-gradient(circle,rgba(56,189,248,.3),transparent 70%);top:40%;left:20%;animation-delay:-4s}
+@keyframes floatOrb{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,30px) scale(1.1)}100%{transform:translate(-15px,-20px) scale(.9)}}
+header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(10,15,30,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05)}
+.user-info{display:flex;align-items:center;gap:14px}
+.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;color:#fff;box-shadow:0 0 20px rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.2);position:relative;transition:all .3s}
+.status h3{font-size:1rem;font-weight:700;color:#f8fafc;letter-spacing:.5px}
+.status span{font-size:.75rem;color:#38bdf8;display:flex;align-items:center;gap:4px;margin-top:2px}
+#chatArea{position:relative;z-index:2;flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+#chatArea::-webkit-scrollbar{width:5px}
+#chatArea::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px}
+.pill{align-self:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 14px;font-size:.72rem;color:#94a3b8;backdrop-filter:blur(10px);margin-bottom:8px}
+.msg-wrap{display:flex;flex-direction:column;align-items:flex-start;max-width:85%;position:relative;touch-action:pan-y;animation:messageIn .35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards}
+@keyframes messageIn{from{opacity:0;transform:translateY(15px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 .msg-wrap.me{align-self:flex-end;align-items:flex-end}
-.msg-bubble{background:linear-gradient(145deg,rgba(30,41,59,.85),rgba(15,23,42,.92));border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:18px 18px 18px 4px;padding:12px 14px;color:#f1f5f9;box-shadow:0 8px 24px rgba(0,0,0,.35);line-height:1.65;font-size:.92rem;position:relative;transition:transform .2s ease,box-shadow .2s;cursor:pointer;user-select:none}
-.msg-wrap.me .msg-bubble{border-radius:18px 18px 4px 18px;background:linear-gradient(145deg,rgba(99,102,241,.85),rgba(168,85,247,.92))}
-.msg-bubble:active{transform:scale(.985)}
-.msg-meta{display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:.7rem;color:#94a3b8;margin-top:6px}
+.msg-bubble{background:linear-gradient(145deg,rgba(30,41,59,.9),rgba(15,23,42,.95));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(16px);border-radius:20px 20px 20px 4px;padding:12px 16px;color:#f1f5f9;box-shadow:0 10px 25px rgba(0,0,0,.3);line-height:1.7;font-size:.93rem;position:relative;transition:transform .2s,box-shadow .2s;user-select:none;word-wrap:break-word}
+.msg-wrap.me .msg-bubble{border-radius:20px 20px 4px 20px;background:linear-gradient(145deg,rgba(99,102,241,.9),rgba(168,85,247,.9));border-color:rgba(255,255,255,.15)}
+.msg-bubble:active{transform:scale(.97)}
+.media-img{width:100%;max-height:250px;border-radius:14px;object-fit:cover;margin-bottom:8px;border:1px solid rgba(255,255,255,.15);display:block}
+.msg-meta{display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:.65rem;color:#94a3b8;margin-top:6px;font-weight:500}
 .msg-wrap.me .msg-meta{color:#e2e8f0}
-footer{position:relative;z-index:10;padding:10px 14px;background:rgba(15,23,42,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
-#msgInput{flex:1;background:rgba(30,41,59,.6);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:9px 14px;color:#f8fafc;font-size:.85rem;outline:none}
-#msgInput::placeholder{color:#94a3b8}
-#sendBtn{background:linear-gradient(135deg,#6366f1,#ec4899);border:none;color:#fff;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
-.error-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,41,59,.95);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:24px;color:#f1f5f9;text-align:center;font-size:.9rem;line-height:1.8;z-index:100;max-width:80%}
+.reaction-badge{position:absolute;bottom:-12px;left:12px;background:rgba(15,23,42,.95);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:2px 8px;font-size:.8rem;box-shadow:0 4px 10px rgba(0,0,0,.5);display:none;z-index:5}
+.msg-wrap.me .reaction-badge{left:auto;right:12px}
+.emoji-picker{position:absolute;top:-50px;left:0;background:rgba(15,23,42,.95);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(20px);border-radius:30px;padding:6px 10px;display:none;gap:10px;z-index:50;box-shadow:0 15px 30px rgba(0,0,0,.6);animation:popIn .2s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
+.msg-wrap.me .emoji-picker{left:auto;right:0}
+@keyframes popIn{from{opacity:0;transform:scale(.5) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.emoji-picker span{font-size:1.4rem;cursor:pointer;transition:transform .2s}
+.emoji-picker span:hover{transform:scale(1.3) translateY(-3px)}
+footer{position:relative;z-index:10;padding:12px 16px;background:rgba(10,15,30,.8);backdrop-filter:blur(25px);border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.action-btn{background:none;border:none;color:#94a3b8;font-size:1.4rem;cursor:pointer;transition:color .2s;display:flex;align-items:center;justify-content:center}
+.action-btn:active{color:#f8fafc}
+#msgInput{flex:1;background:rgba(30,41,59,.5);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:12px 18px;color:#f8fafc;font-size:.9rem;outline:none;transition:border-color .3s}
+#msgInput:focus{border-color:rgba(99,102,241,.5)}
+#msgInput::placeholder{color:#64748b}
+#sendBtn{background:linear-gradient(135deg,#6366f1,#ec4899);border:none;color:#fff;border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 15px rgba(99,102,241,.4);transition:transform .2s}
+#sendBtn:active{transform:scale(.9)}
+#fileInput{display:none}
+.error-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,41,59,.95);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:30px;color:#f1f5f9;text-align:center;font-size:.95rem;line-height:1.8;z-index:100;max-width:85%;box-shadow:0 20px 40px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -59,10 +72,11 @@ footer{position:relative;z-index:10;padding:10px 14px;background:rgba(15,23,42,.
 
 <div id="chatArea">
 <div class="pill">امروز</div>
-<div class="enc-notice"><span>🔒</span> این چت روی سرور گیت‌هاب ذخیره می‌شود.</div>
 </div>
 
 <footer>
+<input type="file" id="fileInput" accept="image/*">
+<button class="action-btn" id="attachBtn">📎</button>
 <input id="msgInput" placeholder="پیامی بنویسید..." autocomplete="off">
 <button id="sendBtn">➤</button>
 </footer>
@@ -74,7 +88,6 @@ footer{position:relative;z-index:10;padding:10px 14px;background:rgba(15,23,42,.
 // ==========================================
 const tokenPart1 = 'github_pat_11CSMC2CA07gm0UueWTT8h';
 const tokenPart2 = '_M10flwPtPqL7slsyycEwWN0i6DA1SXTcWX2pp7vCyU5KMXY5ZYXa7dwu7dd';
-
 const GITHUB_TOKEN = tokenPart1 + tokenPart2;
 const OWNER = 'sasanix';
 const REPO = 'chat-db';
@@ -89,19 +102,36 @@ const sendBtn = document.getElementById('sendBtn');
 const chatTitle = document.getElementById('chatTitle');
 const avatarEl = document.getElementById('avatarEl');
 const presenceStatus = document.getElementById('presenceStatus');
+const fileInput = document.getElementById('fileInput');
+const attachBtn = document.getElementById('attachBtn');
 
 let ISSUE_NUMBER = null;
 let lastETag = null;
+let audioCtx = null;
 
+// ==========================================
+// سیستم تولید رنگ اختصاصی برای هر اسم
+// ==========================================
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    let value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  return color;
+}
+
+avatarEl.style.background = `linear-gradient(135deg, ${stringToColor(ME)}, ${stringToColor(ME + 'x')})`;
 avatarEl.innerText = ME.charAt(0).toUpperCase();
 
-// اگر اسم طرف مقابل وارد نشده باشد
 if (!ME || !TO) {
   document.getElementById('app').innerHTML = `
     <div class="error-box">
-      <div style="font-size:1.2rem;margin-bottom:12px">⚠️ لینک ناقص است</div>
+      <div style="font-size:1.3rem;margin-bottom:12px;color:#fbbf24">⚠️ لینک ناقص است</div>
       لطفاً اسم خود و طرف مقابل را در لینک مشخص کنید.<br><br>
-      <b>مثال:</b><br>
+      <b style="color:#38bdf8">مثال:</b><br>
       ?me=Sasan&to=Ali
     </div>
   `;
@@ -111,193 +141,244 @@ if (!ME || !TO) {
 }
 
 // ==========================================
-// ساخت نام اتاق (مرتب شده بر اساس حروف الفبا)
+// صدای اعلان (WebAudio)
 // ==========================================
+function playSound(isSend) {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(isSend ? 800 : 400, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(isSend ? 1200 : 200, audioCtx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
+
 function getRoomTitle() {
   const sorted = [ME.toLowerCase().trim(), TO.toLowerCase().trim()].sort();
   return `Chat-${sorted[0]}-${sorted[1]}`;
 }
 
-// ==========================================
-// پیدا کردن یا ساختن اتاق
-// ==========================================
 async function findOrCreateRoom() {
   presenceStatus.innerText = 'در حال جستجوی اتاق...';
   const roomTitle = getRoomTitle();
-  
   try {
-    // جستجوی اتاق موجود
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100`, {
-      headers: { 
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github+json'
-      }
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json' }
     });
-    
-    if (!res.ok) throw new Error('خطا در جستجوی اتاق');
+    if (!res.ok) throw new Error();
     const issues = await res.json();
     const existing = issues.find(i => i.title === roomTitle);
     
-    if (existing) {
-      presenceStatus.innerText = 'متصل به گیت‌هاب';
-      return existing.number;
-    }
+    if (existing) { presenceStatus.innerText = 'متصل به گیت‌هاب'; return existing.number; }
     
-    // ساخت اتاق جدید
-    presenceStatus.innerText = 'در حال ساخت اتاق جدید...';
+    presenceStatus.innerText = 'در حال ساخت اتاق...';
     const createRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json'
-      },
-      body: JSON.stringify({ title: roomTitle, body: `اتاق خودکار بین ${ME} و ${TO}` })
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify({ title: roomTitle, body: `اتاق خودکار` })
     });
-    
-    if (!createRes.ok) throw new Error('خطا در ساخت اتاق');
     const newIssue = await createRes.json();
     presenceStatus.innerText = 'متصل به گیت‌هاب';
     return newIssue.number;
-    
   } catch (error) {
-    console.error('Room error:', error);
     presenceStatus.innerText = 'خطا در اتصال';
     return null;
   }
 }
 
-// ==========================================
-// شروع چت
-// ==========================================
 async function startChat() {
   ISSUE_NUMBER = await findOrCreateRoom();
-  if (!ISSUE_NUMBER) {
-    alert('اتصال به سرور برقرار نشد. لطفاً اینترنت خود را بررسی کنید.');
-    return;
-  }
-  
+  if (!ISSUE_NUMBER) { alert('اتصال به سرور برقرار نشد.'); return; }
   await fetchMessages();
-  setInterval(fetchMessages, 4000);
+  setInterval(fetchMessages, 3000);
 }
 
-// ==========================================
-// دریافت پیام‌ها با ETag (بهینه از نظر مصرف API)
-// ==========================================
 async function fetchMessages() {
   if (!ISSUE_NUMBER) return;
-  
   try {
-    const headers = {
-      'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github+json'
-    };
+    const headers = { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json' };
     if (lastETag) headers['If-None-Match'] = lastETag;
     
-    const res = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`,
-      { headers }
-    );
-    
-    if (res.status === 304) return; // پیام جدیدی نیست
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, { headers });
+    if (res.status === 304) return;
     if (!res.ok) return;
     
     lastETag = res.headers.get('ETag');
     const data = await res.json();
     
-    chatArea.innerHTML = `<div class="pill">امروز</div>
-      <div class="enc-notice"><span>🔒</span> این چت روی سرور گیت‌هاب ذخیره می‌شود.</div>`;
-
-    data.forEach(msg => {
-      // فرمت: "Name: text"
+    chatArea.innerHTML = `<div class="pill">امروز</div>`;
+    
+    data.forEach((msg, index) => {
+      // فرمت پیام: Name: text
       const colonIdx = msg.body.indexOf(': ');
       if (colonIdx === -1) return;
-      
       const sender = msg.body.substring(0, colonIdx);
-      const text = msg.body.substring(colonIdx + 2);
+      let text = msg.body.substring(colonIdx + 2);
       
-      // فقط پیام‌های من و طرف مقابل را نمایش بده
+      // تشخیص ری‌اکشن (اگر در انتهای پیام {emoji} بود)
+      let reaction = null;
+      const reactionMatch = text.match(/\s\{([^\}]+)\}$/);
+      if (reactionMatch) {
+        reaction = reactionMatch[1];
+        text = text.replace(/\s\{([^\}]+)\}$/, '');
+      }
+      
       if (sender !== ME && sender !== TO) return;
-      
       const isMe = sender === ME;
-      renderMessage(text, isMe, msg.created_at);
+      
+      renderMessage(text, isMe, msg.created_at, msg.id, reaction);
+      
+      // پخش صدا فقط برای پیام‌های جدیدِ دریافتی
+      if (!isMe && index === data.length - 1 && !lastETag) playSound(false);
     });
-  } catch (error) {
-    console.error('Fetch error:', error);
-  }
+  } catch (error) {}
 }
 
-// ==========================================
-// نمایش پیام روی صفحه
-// ==========================================
-function renderMessage(text, isMe, timestamp) {
+function renderMessage(text, isMe, timestamp, msgId, reaction) {
   const wrap = document.createElement('div');
   wrap.className = 'msg-wrap' + (isMe ? ' me' : '');
+  wrap.dataset.id = msgId;
   
   const time = new Date(timestamp).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
   
+  let contentHtml = '';
+  if (text.startsWith('[IMG]')) {
+    contentHtml = `<img src="${text.replace('[IMG]', '')}" class="media-img">`;
+  } else {
+    contentHtml = `<p>${escapeHtml(text)}</p>`;
+  }
+
+  const picker = document.createElement('div');
+  picker.className = 'emoji-picker';
+  ['❤️','😂','😮','👍','🔥'].forEach(emoji => {
+    const s = document.createElement('span');
+    s.innerText = emoji;
+    s.onclick = (e) => {
+      e.stopPropagation();
+      addReaction(msgId, emoji);
+      picker.style.display = 'none';
+    };
+    picker.appendChild(s);
+  });
+
   wrap.innerHTML = `
     <div class="msg-bubble">
-      <p>${escapeHtml(text)}</p>
+      ${contentHtml}
       <div class="msg-meta">
         <span>${time}</span>
       </div>
+      <div class="reaction-badge" style="${reaction ? 'display:block' : ''}">${reaction || ''}</div>
     </div>
   `;
   
+  wrap.appendChild(picker);
+
+  // لمس طولانی برای ری‌اکشن
+  let pressTimer = null;
+  const bubble = wrap.querySelector('.msg-bubble');
+  bubble.addEventListener('touchstart', (e) => { pressTimer = setTimeout(() => { picker.style.display = 'flex'; playSound(true); }, 500); });
+  bubble.addEventListener('touchend', () => clearTimeout(pressTimer));
+  bubble.addEventListener('touchmove', () => clearTimeout(pressTimer));
+  bubble.addEventListener('mousedown', () => { pressTimer = setTimeout(() => { picker.style.display = 'flex'; playSound(true); }, 500); });
+  bubble.addEventListener('mouseup', () => clearTimeout(pressTimer));
+  
+  document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) picker.style.display = 'none'; });
+
   chatArea.appendChild(wrap);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function addReaction(msgId, emoji) {
+  try {
+    // گرفتن متن فعلی کامنت
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/comments/${msgId}`, {
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json' }
+    });
+    const data = await res.json();
+    let newBody = data.body.replace(/\s\{([^\}]+)\}$/, ''); // حذف ری‌اکشن قبلی
+    newBody += ` {${emoji}}`;
+    
+    // آپدیت کامنت
+    await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/comments/${msgId}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify({ body: newBody })
+    });
+    lastETag = null; // مجبور کردن به رفرش
+    setTimeout(fetchMessages, 500);
+  } catch(e) { console.error(e); }
 }
 
-// ==========================================
-// ارسال پیام
-// ==========================================
-async function sendMessage() {
-  const text = input.value.trim();
-  if (!text || !ISSUE_NUMBER) return;
+async function sendMessage(text = null) {
+  const msgText = text || input.value.trim();
+  if (!msgText || !ISSUE_NUMBER) return;
   
-  input.value = '';
-  renderMessage(text, true, new Date().toISOString());
+  if (!text) input.value = '';
+  renderMessage(msgText, true, new Date().toISOString(), 'temp', null);
+  playSound(true);
   
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json'
-      },
-      body: JSON.stringify({ body: `${ME}: ${text}` })
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify({ body: `${ME}: ${msgText}` })
     });
-    
-    if (!res.ok) {
-      alert('خطا در ارسال پیام. وضعیت: ' + res.status);
-    } else {
-      // به‌روزرسانی فوری برای دیدن پیام خود
-      lastETag = null;
-      setTimeout(fetchMessages, 500);
-    }
-  } catch (error) {
-    console.error('Send error:', error);
-    alert('مشکل در ارتباط با سرور گیت‌هاب.');
-  }
+    if (!res.ok) alert('خطا در ارسال پیام.');
+    else { lastETag = null; setTimeout(fetchMessages, 300); }
+  } catch (error) { alert('مشکل در ارتباط با سرور.'); }
 }
 
-sendBtn.addEventListener('click', sendMessage);
+sendBtn.addEventListener('click', () => sendMessage());
 input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
 
 // ==========================================
-// افکت ستاره‌ها در پس زمینه
+// ارسال عکس با فشرده‌سازی هوشمند
+// ==========================================
+attachBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 400; // فشرده‌سازی برای جا شدن در گیت‌هاب
+      const scaleSize = MAX_WIDTH / img.width;
+      canvas.width = MAX_WIDTH;
+      canvas.height = img.height * scaleSize;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // تبدیل به JPEG با کیفیت 0.6
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+      sendMessage(`[IMG]${dataUrl}`);
+      fileInput.value = '';
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// ==========================================
+// افکت ستاره‌ها
 // ==========================================
 const canvas=document.getElementById("bgCanvas"), ctx=canvas.getContext("2d");
 let particles=[];
 function resizeCanvas(){canvas.width=canvas.parentElement.clientWidth;canvas.height=canvas.parentElement.clientHeight;}
 resizeCanvas(); window.addEventListener("resize",resizeCanvas);
-for(let i=0;i<45;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.8+0.5,dx:(Math.random()-.5)*0.35,dy:(Math.random()-.5)*0.35-0.2,a:Math.random()*0.6+0.2});}
+for(let i=0;i<50;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.8+0.5,dx:(Math.random()-.5)*0.3,dy:(Math.random()-.5)*0.3-0.15,a:Math.random()*0.6+0.2});}
 function renderParticles(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   particles.forEach(p=>{
