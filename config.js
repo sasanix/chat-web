@@ -16,6 +16,10 @@ const CONFIG = {
         SELF_DESTRUCT: true,
         PREMIUM_MODE: false
     },
+    // ⚠️ شماره موبایل و رمز ادمین (این‌ها رو حتماً عوض کن)
+    ADMIN_PHONE: '09172837749', 
+    ADMIN_PASSWORD: 'YourStrongPassword', // ⬅️ اینجا یه رمز قوی بذار (مثلا Sasan@2026)
+    
     APP_NAME: 'چت VIP',
-    VERSION: '14.0-Cloud'
+    VERSION: '15.2-Secure'
 };
