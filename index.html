@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-    <title>چت افسانه‌ای</title>
+    <title>چت VIP</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
@@ -40,7 +40,7 @@
     <div id="sidebar">
         <div class="sidebar-header">
             <h3>لیست مخاطبین</h3>
-            <button class="action-btn" onclick="toggleSidebar()">✖</button>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">✖</button>
         </div>
         <div class="sidebar-list" id="sidebarList"></div>
     </div>
@@ -84,6 +84,25 @@
         </div>
     </div>
 
+    <!-- Modal: Add Contact -->
+    <div id="addContactOverlay" class="modal-screen" style="display:none; background:rgba(0,0,0,0.8); z-index:400;">
+        <div style="background:var(--app-bg); padding:25px; border-radius:20px; width:90%; max-width:350px; border:1px solid var(--border);">
+            <h2 style="text-align:center; margin-bottom:20px;">افزودن مخاطب جدید</h2>
+            <div class="input-group">
+                <label>شناسه VIP مخاطب (۶ رقم)</label>
+                <input id="modalToID" type="number" placeholder="مثلا: 123456" maxlength="6">
+            </div>
+            <div class="input-group">
+                <label>نام مخاطب</label>
+                <input id="modalToName" type="text" placeholder="مثلا: نسترن">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn-large" style="background:var(--input-bg); color:var(--text);" onclick="document.getElementById('addContactOverlay').style.display='none'">انصراف</button>
+                <button class="btn-large" onclick="addContactFromModal()">شروع چت</button>
+            </div>
+        </div>
+    </div>
+
     <div id="musicSearchOverlay" onclick="if(event.target.id==='musicSearchOverlay') closeMusicSearch()">
         <div class="music-modal-content">
             <div class="music-modal-header">
@@ -105,4 +124,4 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
