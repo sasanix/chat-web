@@ -1,5 +1,5 @@
 // ==========================================
-// 4. لایه منطق (App Logic Layer) - Super Simple VIP v15.2 (Full Admin Secure)
+// 4. لایه منطق (App Logic Layer) - Complete Final Version
 // ==========================================
 const params = new URLSearchParams(window.location.search);
 let ME = localStorage.getItem('vip_me_name');
@@ -23,7 +23,7 @@ const savedPin = localStorage.getItem('chatPin');
 let dreamTimer = null;
 
 // ==========================================
-// 1. الگوریتم ریاضی شناسه VIP (Checksum)
+// 1. الگوریتم ریاضی و هش اصالت
 // ==========================================
 function generateVIPID(seed) {
     if (!seed) return "000000";
@@ -45,6 +45,19 @@ function validateVIPID(id) {
     let calculatedChecksum = 0;
     for (let i = 0; i < 5; i++) { calculatedChecksum += parseInt(p1str[i]) * (i + 1); }
     return givenChecksum === (calculatedChecksum % 10);
+}
+
+function generateAuthenticityHash() {
+    const secretSeed = "MehdiBazyari-VIP-Platform-Authentic-2026"; 
+    const adminInfo = CONFIG.ADMIN_PHONE + CONFIG.APP_NAME + CONFIG.VERSION;
+    const combined = secretSeed + adminInfo;
+    let hash = 0;
+    for (let i = 0; i < combined.length; i++) {
+        hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+        hash |= 0;
+    }
+    hash = Math.abs(hash);
+    return hash.toString(16).toUpperCase().padStart(12, '0').match(/.{1,4}/g).join('-');
 }
 
 // ==========================================
@@ -113,7 +126,11 @@ function renderMainWelcome() {
             
             <button class="btn-large" onclick="createNewAccount()">ساخت حساب جدید 🚀</button>
             <button class="btn-link" onclick="renderRestoreScreen()">اکانت قبلی دارم (بازیابی)</button>
-            <p style="font-size:0.7rem;margin-top:30px;opacity:0.6">نسخه VIP | امن و رایگان</p>
+            
+            <div class="authenticity-seal">
+                <div class="seal-icon">🛡️</div>
+                <div class="seal-text">پلتفرم تایید شده (${CONFIG.CREATION_DATE})<br><span class="seal-hash">${generateAuthenticityHash()}</span></div>
+            </div>
         </div>
         <div id="pwaBanner" class="pwa-banner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
     `;
@@ -139,23 +156,18 @@ function renderRestoreScreen() {
 function createNewAccount() {
     const name = document.getElementById('inputMe').value.trim();
     const phone = document.getElementById('inputPhone').value.trim();
-    
     if (!name) return alert('لطفاً نام خود را وارد کنید.');
     if (!phone || phone.length < 10) return alert('لطفاً یک شماره موبایل معتبر وارد کنید.');
-    
     const id = generateVIPID(phone); 
-    
     localStorage.setItem('vip_me_name', name);
     localStorage.setItem('vip_me_id', id);
     localStorage.setItem('vip_me_phone', phone);
-    
     location.reload();
 }
 
 function restoreAccount() {
     const input = document.getElementById('inputRestoreID').value.trim();
     if (!input) return alert('لطفاً فیلد را پر کنید.');
-    
     if (input.length === 6 && !isNaN(input)) {
         if (!validateVIPID(input)) return alert('کد VIP نامعتبر است!');
         const name = prompt('کد شما معتبر است! لطفاً نام نمایشی خود را برای بازیابی وارد کنید:');
@@ -163,8 +175,7 @@ function restoreAccount() {
         localStorage.setItem('vip_me_name', name);
         localStorage.setItem('vip_me_id', input);
         location.reload();
-    } 
-    else if (input.length >= 10) {
+    } else if (input.length >= 10) {
         const phone = input;
         const name = prompt('شماره شما معتبر است! لطفاً نام نمایشی خود را برای بازیابی وارد کنید:');
         if (!name) return;
@@ -180,7 +191,6 @@ function restoreAccount() {
 
 function renderDashboard() {
     const isAdmin = (MY_PHONE === CONFIG.ADMIN_PHONE);
-    
     document.getElementById('app').innerHTML = `
         <div class="welcome-screen" style="justify-content:flex-start;padding-top:40px;padding-bottom:100px;">
             <div class="vip-card" onclick="shareInvite()">
@@ -193,32 +203,83 @@ function renderDashboard() {
             
             <button class="btn-large" onclick="shareInvite()" style="margin-bottom:15px;">🚀 دعوت از دوست جدید</button>
             
+            <button class="btn-large" style="background:linear-gradient(135deg,#10b981,#047857); margin-bottom:15px;" onclick="showSupportModal()">❤️ حمایت و ارتباط با ما</button>
+            
             ${isAdmin ? `<button class="btn-large" style="background:linear-gradient(135deg,#f59e0b,#ef4444); margin-bottom:20px;" onclick="openAdminPanel()">🛠️ پنل مدیریت (ویژه شما)</button>` : ''}
             
             <div style="width:100%; max-width:320px; text-align:right;">
                 <h3 style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">چت‌های اخیر شما:</h3>
-                <div id="recentChatsList">
-                    <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.8rem;">در حال بارگذاری...</div>
-                </div>
+                <div id="recentChatsList"><div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.8rem;">در حال بارگذاری...</div></div>
+            </div>
+
+            <div class="authenticity-seal">
+                <div class="seal-icon">🛡️</div>
+                <div class="seal-text">پلتفرم تایید شده (${CONFIG.CREATION_DATE})<br><span class="seal-hash">${generateAuthenticityHash()}</span></div>
             </div>
         </div>
         <div id="pwaBanner" class="pwa-banner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
+        
+        <div id="supportModal" class="support-modal">
+            <div class="support-content">
+                <div class="support-header">
+                    <h3>👑 اعتماد و حمایت</h3>
+                    <button class="close-support" onclick="hideSupportModal()">✖</button>
+                </div>
+                
+                <div class="support-section">
+                    <h4>🛡️ اصالت پلتفرم</h4>
+                    <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-bottom:5px;">تاریخ ثبت و ساخت اولیه: ${CONFIG.CREATION_DATE}</div>
+                    <div style="text-align:center; font-family:monospace; color:var(--gold); font-size:0.85rem;">${generateAuthenticityHash()}</div>
+                </div>
+
+                <div class="support-section">
+                    <h4>❤️ حمایت مالی (اختیاری)</h4>
+                    <div class="support-box" onclick="copyText('${CONFIG.CARD_NUMBER}')">
+                        <span class="support-text">${CONFIG.CARD_NUMBER.match(/.{1,4}/g).join('-')}</span>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <div class="support-box" onclick="copyText('${CONFIG.SHABA_NUMBER}')">
+                        <span class="support-text" style="font-size:0.7rem;">${CONFIG.SHABA_NUMBER}</span>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <div style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-top:5px;">به نام: ${CONFIG.ADMIN_NAME}</div>
+                </div>
+
+                <div class="support-section">
+                    <h4>📞 پشتیبانی و نظرات</h4>
+                    <a href="tel:${CONFIG.SUPPORT_PHONE}" class="support-box" style="text-decoration:none;">
+                        <span class="support-text">${CONFIG.SUPPORT_PHONE.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3')}</span>
+                        <button class="copy-btn" style="background:#10b981; color:white;">تماس</button>
+                    </a>
+                </div>
+
+                <div class="legal-text">
+                    <b>⚠️ هشدار حقوقی:</b> کلیه حقوق مادی و معنوی این پلتفرم (شامل طراحی، کدنویسی، رابط کاربری، برند و هش اصالت) متعلق به مدیریت سیستم (${CONFIG.ADMIN_NAME}) می‌باشد. هرگونه کپی‌برداری، الگوبرداری، مهندسی معکوس یا استفاده تجاری از این سیستم بدون اجازه کتبی، نقض قوانین کپی‌رایت بوده و پیگرد قانونی به همراه خواهد داشت.
+                </div>
+            </div>
+        </div>
     `;
     loadRecentChats();
+}
+
+function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
+function hideSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
+function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('کپی شد! ✅');
+    }).catch(() => {
+        alert('کد: ' + text);
+    });
 }
 
 async function loadRecentChats() {
     const listDiv = document.getElementById('recentChatsList');
     if (!listDiv) return;
-    
     try {
         const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
-        });
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
         if (!res.ok) throw new Error();
         const issues = await res.json();
-        
         let myChats = [];
         issues.forEach(issue => {
             if (issue.title.startsWith('VIP-')) {
@@ -229,12 +290,10 @@ async function loadRecentChats() {
                 }
             }
         });
-        
         if (myChats.length === 0) {
             listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.8rem; border:1px dashed var(--border); border-radius:12px;">هنوز کسی به دعوتت جواب نداده است.</div>`;
             return;
         }
-        
         listDiv.innerHTML = '';
         myChats.forEach(chat => {
             const div = document.createElement('div');
@@ -250,127 +309,40 @@ function shareInvite() {
     const baseUrl = window.location.origin + window.location.pathname;
     const shareUrl = `${baseUrl}?to=${MY_ID}&toName=${encodeURIComponent(ME)}`;
     const shareText = `سلام! بیا با هم توی چت VIP حرف بزنیم.\nروی این لینک کلیک کن:\n${shareUrl}`;
-    
-    if (navigator.share) {
-        navigator.share({ title: 'دعوت به چت VIP', text: shareText, url: shareUrl }).catch(console.error);
-    } else {
-        navigator.clipboard.writeText(shareText).then(() => { alert('لینک کپی شد! اون رو برای دوستت بفرست.'); });
-    }
+    if (navigator.share) { navigator.share({ title: 'دعوت به چت VIP', text: shareText, url: shareUrl }).catch(console.error); } 
+    else { navigator.clipboard.writeText(shareText).then(() => { alert('لینک کپی شد! اون رو برای دوستت بفرست.'); }); }
 }
 
-// ==========================================
-// 5. پنل مدیریت (Admin Panel - Secure)
-// ==========================================
-async function openAdminPanel() {
-    // گرفتن رمز عبور از کاربر
-    const enteredPassword = prompt('🔐 برای ورود به پنل مدیریت، رمز عبور خود را وارد کنید:');
-    
-    if (enteredPassword !== CONFIG.ADMIN_PASSWORD) {
-        return alert('❌ رمز عبور اشتباه است!');
-    }
-
+function renderGuestWelcome(hostId, hostName) {
     document.getElementById('app').innerHTML = `
-        <div class="welcome-screen" style="justify-content:flex-start;padding-top:20px; background:#04050a; z-index:500;">
-            <div style="width:100%; max-width:400px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="font-size:1.2rem; color:#fbbf24;">🛠️ پنل مدیریت کل</h2>
-                <button class="btn-link" style="margin:0; color:#ef4444;" onclick="renderDashboard()">بازگشت</button>
-            </div>
-            <div id="adminChatsList" style="width:100%; max-width:400px; text-align:right;">
-                <div style="text-align:center; color:var(--text-muted);">در حال دریافت لیست چت‌های کل سیستم...</div>
+        <div class="welcome-screen">
+            <div style="font-size:3rem;margin-bottom:15px">💌</div>
+            <h2>شما دعوت شده‌اید!</h2>
+            <p><b>${hostName || 'یک دوست'}</b> شما را به چت VIP دعوت کرده است. برای شروع، اطلاعات خودتان را وارد کنید.</p>
+            <div class="input-group" style="margin-top:20px;"><label>نام نمایشی شما</label><input id="inputGuestMe" type="text" placeholder="مثلا: حسن"></div>
+            <div class="input-group"><label>شماره موبایل شما</label><input id="inputGuestPhone" type="tel" placeholder="مثلا: 09123456789" maxlength="11"></div>
+            <button class="btn-large" onclick="joinAsGuest('${hostId}', '${hostName}')">ورود به چت 🚀</button>
+            <div class="authenticity-seal">
+                <div class="seal-icon">🛡️</div>
+                <div class="seal-text">پلتفرم تایید شده (${CONFIG.CREATION_DATE})<br><span class="seal-hash">${generateAuthenticityHash()}</span></div>
             </div>
         </div>
+        <div id="pwaBanner" class="pwa-banner">📲 برای تجربه بهتر نصب کنید <button onclick="installPWA()">نصب</button></div>
     `;
-    
-    try {
-        const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
-        });
-        const issues = await res.json();
-        const adminList = document.getElementById('adminChatsList');
-        adminList.innerHTML = '';
-        
-        const rooms = issues.filter(i => i.title.startsWith('VIP-'));
-        
-        if (rooms.length === 0) {
-            adminList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">هیچ اتاقی در سیستم ساخته نشده است.</div>';
-            return;
-        }
-
-        rooms.forEach(room => {
-            const parts = room.title.replace('VIP-', '').split('-');
-            const div = document.createElement('div');
-            div.style.cssText = 'padding:12px; border-radius:12px; background:rgba(255,255,255,0.05); margin-bottom:8px; cursor:pointer; border:1px solid var(--border);';
-            div.innerHTML = `
-                <div style="font-weight:bold; color:#38bdf8; margin-bottom:5px;">اتاق: ${room.title}</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">کاربر ۱: ${parts[0]} | کاربر ۲: ${parts[1]}</div>
-                <div style="font-size:0.7rem; color:var(--gold); margin-top:5px;">تعداد پیام: ${room.comments} | آخرین فعالیت: ${new Date(room.updated_at).toLocaleDateString('fa-IR')}</div>
-            `;
-            div.onclick = () => viewAdminChat(room.number, room.title);
-            adminList.appendChild(div);
-        });
-    } catch(e) {
-        document.getElementById('adminChatsList').innerHTML = '<div style="color:#ef4444;">خطا در دریافت اطلاعات.</div>';
-    }
 }
 
-async function viewAdminChat(roomNumber, roomTitle) {
-    document.getElementById('app').innerHTML = `
-        <div style="position:absolute; inset:0; background:#04050a; z-index:600; display:flex; flex-direction:column;">
-            <div style="padding:15px; background:rgba(15,23,42,0.9); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="color:#fbbf24; font-size:0.9rem;">مشاهده چت: ${roomTitle}</h3>
-                <button class="btn-link" style="margin:0; color:#ef4444;" onclick="openAdminPanel()">بستن</button>
-            </div>
-            <div id="adminChatArea" style="flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:10px;">
-                <div style="text-align:center; color:var(--text-muted);">در حال دریافت پیام‌ها...</div>
-            </div>
-        </div>
-    `;
-    
-    try {
-        const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${roomNumber}/comments`, { 
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } 
-        });
-        const messages = await res.json();
-        const chatArea = document.getElementById('adminChatArea');
-        chatArea.innerHTML = '';
-        
-        if (messages.length === 0) {
-            chatArea.innerHTML = '<div style="text-align:center; color:var(--text-muted);">این اتاق هنوز پیامی ندارد.</div>';
-            return;
-        }
-
-        messages.forEach(msg => {
-            const colonIdx = msg.body.indexOf(': ');
-            let sender = "ناشناس", text = msg.body;
-            if (colonIdx !== -1) {
-                sender = msg.body.substring(0, colonIdx);
-                text = msg.body.substring(colonIdx + 2);
-            }
-            
-            if (!text.startsWith('[IMG]') && !text.startsWith('[AUDIO]') && !text.startsWith('[LOC]') && !text.startsWith('[MUSIC]')) {
-                text = decryptText(text);
-            }
-
-            const div = document.createElement('div');
-            div.style.cssText = 'background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; border-right:3px solid #6366f1;';
-            div.innerHTML = `
-                <div style="font-size:0.75rem; color:#38bdf8; font-weight:bold; margin-bottom:4px;">${sender}</div>
-                <div style="font-size:0.9rem; color:var(--text);">${escapeHtml(text)}</div>
-                <div style="font-size:0.65rem; color:var(--text-muted); margin-top:5px; text-align:left;">${new Date(msg.created_at).toLocaleTimeString('fa-IR')}</div>
-            `;
-            chatArea.appendChild(div);
-        });
-        chatArea.scrollTop = chatArea.scrollHeight;
-    } catch(e) {
-        document.getElementById('adminChatArea').innerHTML = '<div style="color:#ef4444;">خطا در دریافت پیام‌ها.</div>';
-    }
+function joinAsGuest(hostId, hostName) {
+    const name = document.getElementById('inputGuestMe').value.trim();
+    const phone = document.getElementById('inputGuestPhone').value.trim();
+    if (!name) return alert('لطفاً نام خود را وارد کنید.');
+    if (!phone || phone.length < 10) return alert('لطفاً یک شماره موبایل معتبر وارد کنید.');
+    const id = generateVIPID(phone);
+    localStorage.setItem('vip_me_name', name);
+    localStorage.setItem('vip_me_id', id);
+    localStorage.setItem('vip_me_phone', phone);
+    window.location.href = `?to=${hostId}&toName=${encodeURIComponent(hostName)}`;
 }
 
-// ==========================================
-// 6. شروع چت دو نفره
-// ==========================================
 async function initChatApp(hostId, hostName) {
     const chatTitleEl = document.getElementById('chatTitle');
     if(chatTitleEl) chatTitleEl.innerText = `چت با ${hostName || 'دوست'}`;
@@ -467,9 +439,6 @@ function processMessage(msg, isInitial = false, isLast = false) {
     if (!isInitial && !isMe && isLast) setTimeout(() => { playSynthSound('receive'); vibrate('receive'); }, 200);
 }
 
-// ==========================================
-// 7. ابزارهای کمکی و نمایش پیام
-// ==========================================
 function encryptText(text) { if(!CONFIG.FEATURES.E2EE) return text; const key = 'ch4t-s3cr3t-k3y'; let result = ''; for(let i = 0; i < text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length)); return btoa(unescape(encodeURIComponent(result))); }
 function decryptText(encoded) { if(!CONFIG.FEATURES.E2EE) return encoded; try { const key = 'ch4t-s3cr3t-k3y'; const text = decodeURIComponent(escape(atob(encoded))); let result = ''; for(let i = 0; i < text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length)); return result; } catch(e) { return encoded; } }
 function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -510,9 +479,6 @@ function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml
 window.playAudio = (el, src) => { if (currentAudioPlayer) { currentAudioPlayer.pause(); document.querySelectorAll('.custom-audio').forEach(a => a.classList.remove('playing')); } if (currentAudioPlayer && currentAudioPlayer.src === src) { currentAudioPlayer = null; return; } const audio = new Audio(src); audio.play(); currentAudioPlayer = audio; el.classList.add('playing'); el.querySelector('.audio-play-btn').innerText = '⏸️'; audio.onended = () => { el.classList.remove('playing'); el.querySelector('.audio-play-btn').innerText = '▶️'; currentAudioPlayer = null; }; };
 window.playFullMusic = (btn, src) => { if (currentCardAudio) { currentCardAudio.pause(); } if (currentCardAudio && currentCardAudio.src === src) { currentCardAudio = null; btn.innerText = '▶️'; return; } const audio = new Audio(src); audio.play(); currentCardAudio = audio; btn.innerText = '⏸️'; audio.onended = () => { btn.innerText = '▶️'; currentCardAudio = null; }; };
 
-// ==========================================
-// 8. توابع کنش‌ها
-// ==========================================
 async function sendMessage(text = null) {
     const input = document.getElementById('msgInput');
     const sendBtn = document.getElementById('sendBtn');
@@ -561,9 +527,6 @@ function playTTS(text) { if ('speechSynthesis' in window) { const u = new Speech
 function startReply(id, textPreview) { replyToId = id; const input = document.getElementById('msgInput'); input.value = textPreview; input.focus(); input.placeholder = "پاسخ به: " + textPreview; document.querySelectorAll('.context-menu').forEach(m => m.style.display='none'); }
 function cancelReply() { replyToId = null; document.getElementById('msgInput').placeholder = "پیامی بنویسید..."; }
 
-// ==========================================
-// 9. تنظیمات UI و ویس و موزیک
-// ==========================================
 function initThemeAndAvatar() {
     const themeBtn = document.getElementById('themeBtn');
     if(!themeBtn) return;
@@ -736,3 +699,85 @@ function updateCircadianAmbient() {
 }
 updateCircadianAmbient();
 setInterval(updateCircadianAmbient, 60000);
+
+async function openAdminPanel() {
+    const enteredPassword = prompt('🔐 برای ورود به پنل مدیریت، رمز عبور خود را وارد کنید:');
+    if (enteredPassword !== CONFIG.ADMIN_PASSWORD) { return alert('❌ رمز عبور اشتباه است!'); }
+
+    document.getElementById('app').innerHTML = `
+        <div class="welcome-screen" style="justify-content:flex-start;padding-top:20px; background:#04050a; z-index:500;">
+            <div style="width:100%; max-width:400px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:1.2rem; color:#fbbf24;">🛠️ پنل مدیریت کل</h2>
+                <button class="btn-link" style="margin:0; color:#ef4444;" onclick="renderDashboard()">بازگشت</button>
+            </div>
+            <div id="adminChatsList" style="width:100%; max-width:400px; text-align:right;">
+                <div style="text-align:center; color:var(--text-muted);">در حال دریافت لیست چت‌های کل سیستم...</div>
+            </div>
+        </div>
+    `;
+    
+    try {
+        const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues?state=all&per_page=100`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+        const issues = await res.json();
+        const adminList = document.getElementById('adminChatsList');
+        adminList.innerHTML = '';
+        
+        const rooms = issues.filter(i => i.title.startsWith('VIP-'));
+        if (rooms.length === 0) { adminList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">هیچ اتاقی در سیستم ساخته نشده است.</div>'; return; }
+
+        rooms.forEach(room => {
+            const parts = room.title.replace('VIP-', '').split('-');
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:12px; border-radius:12px; background:rgba(255,255,255,0.05); margin-bottom:8px; cursor:pointer; border:1px solid var(--border);';
+            div.innerHTML = `
+                <div style="font-weight:bold; color:#38bdf8; margin-bottom:5px;">اتاق: ${room.title}</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">کاربر ۱: ${parts[0]} | کاربر ۲: ${parts[1]}</div>
+                <div style="font-size:0.7rem; color:var(--gold); margin-top:5px;">تعداد پیام: ${room.comments} | آخرین فعالیت: ${new Date(room.updated_at).toLocaleDateString('fa-IR')}</div>
+            `;
+            div.onclick = () => viewAdminChat(room.number, room.title);
+            adminList.appendChild(div);
+        });
+    } catch(e) { document.getElementById('adminChatsList').innerHTML = '<div style="color:#ef4444;">خطا در دریافت اطلاعات.</div>'; }
+}
+
+async function viewAdminChat(roomNumber, roomTitle) {
+    document.getElementById('app').innerHTML = `
+        <div style="position:absolute; inset:0; background:#04050a; z-index:600; display:flex; flex-direction:column;">
+            <div style="padding:15px; background:rgba(15,23,42,0.9); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:#fbbf24; font-size:0.9rem;">مشاهده چت: ${roomTitle}</h3>
+                <button class="btn-link" style="margin:0; color:#ef4444;" onclick="openAdminPanel()">بستن</button>
+            </div>
+            <div id="adminChatArea" style="flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:10px;">
+                <div style="text-align:center; color:var(--text-muted);">در حال دریافت پیام‌ها...</div>
+            </div>
+        </div>
+    `;
+    
+    try {
+        const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/${roomNumber}/comments`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
+        const messages = await res.json();
+        const chatArea = document.getElementById('adminChatArea');
+        chatArea.innerHTML = '';
+        
+        if (messages.length === 0) { chatArea.innerHTML = '<div style="text-align:center; color:var(--text-muted);">این اتاق هنوز پیامی ندارد.</div>'; return; }
+
+        messages.forEach(msg => {
+            const colonIdx = msg.body.indexOf(': ');
+            let sender = "ناشناس", text = msg.body;
+            if (colonIdx !== -1) { sender = msg.body.substring(0, colonIdx); text = msg.body.substring(colonIdx + 2); }
+            if (!text.startsWith('[IMG]') && !text.startsWith('[AUDIO]') && !text.startsWith('[LOC]') && !text.startsWith('[MUSIC]')) { text = decryptText(text); }
+
+            const div = document.createElement('div');
+            div.style.cssText = 'background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; border-right:3px solid #6366f1;';
+            div.innerHTML = `
+                <div style="font-size:0.75rem; color:#38bdf8; font-weight:bold; margin-bottom:4px;">${sender}</div>
+                <div style="font-size:0.9rem; color:var(--text);">${escapeHtml(text)}</div>
+                <div style="font-size:0.65rem; color:var(--text-muted); margin-top:5px; text-align:left;">${new Date(msg.created_at).toLocaleTimeString('fa-IR')}</div>
+            `;
+            chatArea.appendChild(div);
+        });
+        chatArea.scrollTop = chatArea.scrollHeight;
+    } catch(e) { document.getElementById('adminChatArea').innerHTML = '<div style="color:#ef4444;">خطا در دریافت پیام‌ها.</div>'; }
+                    }
