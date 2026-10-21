@@ -1,5 +1,5 @@
 // ==========================================
-// 4. لایه منطق (App Logic Layer)
+// 4. لایه منطق (App Logic Layer) - Living Dream v12.0
 // ==========================================
 const params = new URLSearchParams(window.location.search);
 const ME = params.get('me');
@@ -11,13 +11,162 @@ let renderedMsgIds = new Set(), isDestructMode = false;
 let mediaRecorder = null, audioChunks = [], isRecordingVoice = false;
 let currentPreviewAudio = null, currentPreviewBtn = null;
 let currentCardAudio = null, currentCardBtn = null;
+let currentAudioPlayer = null;
 let audioCtx = null, isMusicPlaying = false, chordInterval = null, analyser = null;
 const chords = [[261.63, 329.63, 392.00, 493.88], [220.00, 261.63, 329.63, 392.00], [174.61, 220.00, 261.63, 329.63], [196.00, 246.94, 293.66, 349.23]];
 let chordIdx = 0, pinBuffer = '';
 const savedPin = localStorage.getItem('chatPin');
+let dreamTimer = null;
 
 // ==========================================
-// 1. راه‌اندازی اولیه
+// 1. سیستم محیط شبانه‌روزی (Circadian Ambient)
+// ==========================================
+function updateCircadianAmbient() {
+    const hour = new Date().getHours();
+    const root = document.documentElement;
+    
+    if (hour >= 5 && hour < 10) {
+        // صبح - طلایی
+        root.style.setProperty('--ambient-1', '#fbbf24');
+        root.style.setProperty('--ambient-2', '#f59e0b');
+        root.style.setProperty('--accent', '#f59e0b');
+    } else if (hour >= 10 && hour < 16) {
+        // ظهر - آبی روشن
+        root.style.setProperty('--ambient-1', '#38bdf8');
+        root.style.setProperty('--ambient-2', '#0ea5e9');
+        root.style.setProperty('--accent', '#0ea5e9');
+    } else if (hour >= 16 && hour < 20) {
+        // غروب - نارنجی-بنفش
+        root.style.setProperty('--ambient-1', '#f97316');
+        root.style.setProperty('--ambient-2', '#a855f7');
+        root.style.setProperty('--accent', '#a855f7');
+    } else {
+        // شب - نیلی عمیق
+        root.style.setProperty('--ambient-1', '#1e1b4b');
+        root.style.setProperty('--ambient-2', '#312e81');
+        root.style.setProperty('--accent', '#6366f1');
+    }
+}
+updateCircadianAmbient();
+setInterval(updateCircadianAmbient, 60000);
+
+// ==========================================
+// 2. موتور احساسات (Sentiment Engine)
+// ==========================================
+const SENTIMENTS = {
+    love: { words: ['دوستت دارم', 'عاشقتم', 'love', 'قلبم', '❤️', 'عشق'], color: '#ec4899', ambient: '#fbcfe8' },
+    sad: { words: ['غمگین', 'ناراحت', 'گریه', 'sad', '😢', '😭', 'دلتنگ'], color: '#3b82f6', ambient: '#93c5fd' },
+    angry: { words: ['عصبانی', 'متنفر', 'angry', '😡', '🤬', 'خشم'], color: '#ef4444', ambient: '#fca5a5' },
+    happy: { words: ['خوشحال', 'عالی', 'happy', '😍', '🥳', 'شاد'], color: '#f59e0b', ambient: '#fde68a' }
+};
+
+function detectSentiment(text) {
+    const lowerText = text.toLowerCase();
+    for (const [key, data] of Object.entries(SENTIMENTS)) {
+        if (data.words.some(w => lowerText.includes(w.toLowerCase()))) {
+            return data;
+        }
+    }
+    return null;
+}
+
+function applySentiment(sentiment) {
+    if (!sentiment) return;
+    const root = document.documentElement;
+    root.style.setProperty('--accent', sentiment.color);
+    root.style.setProperty('--ambient-1', sentiment.ambient);
+    // بازگشت به حالت عادی بعد از 8 ثانیه
+    setTimeout(() => updateCircadianAmbient(), 8000);
+}
+
+// ==========================================
+// 3. زبان لمسی (Haptic Language)
+// ==========================================
+const HAPTICS = {
+    send: [20],
+    receive: [15, 30, 15],
+    react: [10, 15, 10, 15, 10],
+    delete: [60],
+    error: [100, 50, 100],
+    typing: [3]
+};
+
+function vibrate(type) {
+    if (!navigator.vibrate) return;
+    try {
+        navigator.vibrate(HAPTICS[type] || [10]);
+    } catch(e) {}
+}
+
+// ==========================================
+// 4. طراحی صدای کامل (Complete Sound Design)
+// ==========================================
+function playSynthSound(type) {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    if (type === 'send') {
+        // صدای باد ملایم (صعودی)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.2);
+    } else if (type === 'receive') {
+        // صدای زنگ آروم
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(660, now + 0.08);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.3);
+    } else if (type === 'react') {
+        // صدای کریستالی (کوتاه و شفاف)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1500, now);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.1);
+    } else if (type === 'delete') {
+        // صدای سووش (نزولی)
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.3);
+    }
+}
+
+// ==========================================
+// 5. حالت رویا (Dream Mode)
+// ==========================================
+function resetDreamTimer() {
+    clearTimeout(dreamTimer);
+    document.body.classList.remove('dream-mode');
+    dreamTimer = setTimeout(() => {
+        document.body.classList.add('dream-mode');
+    }, 60000); // 60 ثانیه
+}
+
+['touchstart', 'mousedown', 'keydown', 'scroll'].forEach(evt => {
+    document.addEventListener(evt, resetDreamTimer, { passive: true });
+});
+resetDreamTimer();
+
+// ==========================================
+// 6. راه‌اندازی اولیه
 // ==========================================
 if (!ME || !TO) {
     document.getElementById('app').innerHTML = `
@@ -27,7 +176,7 @@ if (!ME || !TO) {
             <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:25px;text-align:center">برای شروع چت، لطفاً اطلاعات خود را وارد کنید</p>
             <input id="loginMe" type="text" placeholder="اسم خودت چیه؟" style="width:100%;max-width:300px;padding:14px 18px;border-radius:14px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:.95rem;outline:none;margin-bottom:12px;text-align:center;font-family:inherit">
             <input id="loginTo" type="text" placeholder="با کی میخوای چت کنی؟" style="width:100%;max-width:300px;padding:14px 18px;border-radius:14px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:.95rem;outline:none;margin-bottom:24px;text-align:center;font-family:inherit">
-            <button onclick="startLogin()" style="width:100%;max-width:300px;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#6366f1,#ec4899);color:white;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">ورود به چت 🚀</button>
+            <button onclick="startLogin()" style="width:100%;max-width:300px;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),#ec4899);color:white;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">ورود به چت 🚀</button>
             <p style="color:var(--text-muted);font-size:.7rem;margin-top:20px">${CONFIG.APP_NAME} | v${CONFIG.VERSION}</p>
         </div>
     `;
@@ -49,10 +198,28 @@ async function initChatApp() {
     setupUI();
     setupBackground();
     if (savedPin) document.getElementById('pinScreen').style.display = 'flex';
+    
+    // اضافه کردن لایه محیطی
+    const ambientLayer = document.createElement('div');
+    ambientLayer.id = 'ambientLayer';
+    document.getElementById('app').prepend(ambientLayer);
+    
+    // اضافه کردن هاله آواتار
+    const avatarEl = document.getElementById('avatarEl');
+    const aura = document.createElement('div');
+    aura.className = 'avatar-aura';
+    avatarEl.parentElement.classList.add('avatar-wrapper');
+    avatarEl.parentElement.prepend(aura);
+    
+    // اضافه کردن hint حالت رویا
+    const hint = document.createElement('div');
+    hint.className = 'dream-hint';
+    hint.innerText = '✨ در حال رویا... برای بیدار شدن لمس کن ✨';
+    document.body.appendChild(hint);
 }
 
 // ==========================================
-// 2. اتصال به دیتابیس
+// 7. اتصال به دیتابیس
 // ==========================================
 async function startDatabaseConnection() {
     const presenceStatus = document.getElementById('presenceStatus');
@@ -69,7 +236,7 @@ async function startDatabaseConnection() {
 }
 
 // ==========================================
-// 3. منطق دریافت پیام‌ها
+// 8. منطق دریافت پیام‌ها
 // ==========================================
 async function fetchAndRenderMessages(isInitial = false) {
     if (!ISSUE_NUMBER) return;
@@ -80,7 +247,7 @@ async function fetchAndRenderMessages(isInitial = false) {
     let unreadDividerAdded = false;
     if (isInitial) { document.getElementById('chatArea').innerHTML = `<div class="pill">امروز</div>`; renderedMsgIds.clear(); }
     
-    newMessages.forEach((msg) => {
+    newMessages.forEach((msg, index) => {
         const colonIdx = msg.body.indexOf(': ');
         if (colonIdx === -1) return;
         const sender = msg.body.substring(0, colonIdx);
@@ -128,6 +295,14 @@ async function fetchAndRenderMessages(isInitial = false) {
         if (!renderedMsgIds.has(msg.id)) {
             renderMessage(text, isMe, msg.created_at, msg.id, reaction, isRead, replyHtml, isMe, isDestruct);
             renderedMsgIds.add(msg.id);
+            
+            // صدای دریافت فقط برای پیام‌های جدید (نه لود اولیه)
+            if (!isInitial && !isMe && index === newMessages.length - 1) {
+                setTimeout(() => {
+                    playSynthSound('receive');
+                    vibrate('receive');
+                }, 200);
+            }
         } else {
             const existingWrap = document.querySelector(`.msg-wrap[data-id="${msg.id}"]`);
             if (existingWrap) {
@@ -148,7 +323,7 @@ async function fetchAndRenderMessages(isInitial = false) {
 }
 
 // ==========================================
-// 4. ابزارهای کمکی
+// 9. ابزارهای کمکی
 // ==========================================
 function encryptText(text) {
     if(!CONFIG.FEATURES.E2EE) return text;
@@ -168,7 +343,7 @@ function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&l
 function stringToColor(str) { let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash); let color = '#'; for (let i = 0; i < 3; i++) { let value = (hash >> (i * 8)) & 0xFF; color += ('00' + value.toString(16)).substr(-2); } return color; }
 
 // ==========================================
-// 5. نمایش پیام
+// 10. نمایش پیام
 // ==========================================
 function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml, isNew = true, isDestruct = false) {
     const chatArea = document.getElementById('chatArea');
@@ -179,19 +354,19 @@ function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml
     
     let contentHtml = '';
     if (text.startsWith('[IMG]')) contentHtml = `<img src="${text.replace('[IMG]', '')}" class="media-img">`;
-    else if (text.startsWith('[AUDIO]')) contentHtml = `<audio controls src="${text.replace('[AUDIO]', '')}" class="audio-player"></audio>`;
+    else if (text.startsWith('[AUDIO]')) {
+        const audioSrc = text.replace('[AUDIO]', '');
+        contentHtml = `<div class="custom-audio" onclick="playAudio(this, '${audioSrc}')"><div class="audio-play-btn">▶️</div><div class="audio-waveform"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="audio-duration">ویس</div></div>`;
+    }
     else if (text.startsWith('[LOC]')) {
         const coords = text.replace('[LOC]', '');
-        contentHtml = `<a href="https://maps.google.com/?q=${coords}" target="_blank" class="music-card"><div class="music-icon" style="background:#10b981">📍</div><div class="music-details"><div class="music-title">موقعیت مکانی</div><div class="music-subtitle">برای دیدن نقشه کلیک کنید</div></div></a>`;
+        contentHtml = `<a href="https://www.google.com/maps/search/?api=1&query=${coords}" target="_blank" class="music-card"><div class="music-icon" style="background:#10b981">📍</div><div class="music-details"><div class="music-title">موقعیت مکانی</div><div class="music-subtitle">برای دیدن نقشه کلیک کنید</div></div></a>`;
     } else if (text.startsWith('[MUSIC]')) {
-        const parts = text.replace('[MUSIC]', '').split('|||'); const title = parts[0] || ''; const artist = parts[1] || ''; const artwork = parts[2] || ''; const preview = parts[3] || '';
-        contentHtml = `<div class="music-card-full"><img src="${artwork}" class="mc-art" onerror="this.style.display='none'"><div class="mc-info"><div class="mc-title">${escapeHtml(title)}</div><div class="mc-artist">${escapeHtml(artist)}</div><div class="mc-controls"><button class="mc-play" data-cardid="mc-${msgId}" data-preview="${preview}" onclick="playMusicCard(this)">▶️ پخش</button></div></div></div>`;
+        const parts = text.replace('[MUSIC]', '').split('|||');
+        const videoId = parts[0] || ''; const title = parts[1] || ''; const artist = parts[2] || ''; const artwork = parts[3] || '';
+        contentHtml = `<div class="music-card-full" style="flex-direction:column; padding:0;"><div style="padding:12px; display:flex; gap:12px; align-items:center; width:100%;"><img src="${artwork}" class="mc-art" onerror="this.style.display='none'"><div class="mc-info"><div class="mc-title">${escapeHtml(title)}</div><div class="mc-artist">${escapeHtml(artist)}</div></div></div><iframe width="100%" height="180" src="https://www.youtube.com/embed/${videoId}?autoplay=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:0 0 16px 16px; border:none;"></iframe></div>`;
     } else {
-        const ytRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+)/g; const spotifyRegex = /(https?:\/\/(?:open\.)?spotify\.com\/[^\s]+)/g;
-        const ytMatch = text.match(ytRegex); const spotifyMatch = text.match(spotifyRegex);
-        if (ytMatch) contentHtml = `<a href="${ytMatch[0]}" target="_blank" class="music-card"><div class="music-icon">▶️</div><div class="music-details"><div class="music-title">آهنگ یوتیوب</div><div class="music-subtitle">برای پخش کلیک کنید</div></div></a>`;
-        else if (spotifyMatch) contentHtml = `<a href="${spotifyMatch[0]}" target="_blank" class="music-card"><div class="music-icon spotify">🎵</div><div class="music-details"><div class="music-title">آهنگ اسپاتیفای</div><div class="music-subtitle">برای پخش کلیک کنید</div></div></a>`;
-        else contentHtml = `<p>${escapeHtml(text)}</p>`;
+        contentHtml = `<p>${escapeHtml(text)}</p>`;
     }
     
     const destructHtml = isDestruct ? `<div class="destruct-badge">💣 پیام خودتخریب</div>` : '';
@@ -203,23 +378,37 @@ function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml
     wrap.appendChild(contextMenu);
     
     let pressTimer = null, touchStartX = 0, touchStartY = 0; const bubble = wrap.querySelector('.msg-bubble');
-    bubble.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; pressTimer = setTimeout(() => { contextMenu.style.display = 'flex'; if(navigator.vibrate) navigator.vibrate(20); }, 500); });
+    bubble.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; pressTimer = setTimeout(() => { contextMenu.style.display = 'flex'; vibrate('react'); }, 500); });
     bubble.addEventListener('touchmove', (e) => { clearTimeout(pressTimer); let diffX = e.touches[0].clientX - touchStartX, diffY = Math.abs(e.touches[0].clientY - touchStartY); if (diffY < 30 && diffX > 0 && diffX < 80) bubble.style.transform = `translateX(${diffX}px)`; });
-    bubble.addEventListener('touchend', (e) => { clearTimeout(pressTimer); let diffX = e.changedTouches[0].clientX - touchStartX, diffY = Math.abs(e.changedTouches[0].clientY - touchStartY); bubble.style.transform = 'translateX(0)'; if (diffY < 30 && diffX > 60) { startReply(msgId, text.substring(0,20)+'...'); if(navigator.vibrate) navigator.vibrate(15); } });
+    bubble.addEventListener('touchend', (e) => { clearTimeout(pressTimer); let diffX = e.changedTouches[0].clientX - touchStartX, diffY = Math.abs(e.changedTouches[0].clientY - touchStartY); bubble.style.transform = 'translateX(0)'; if (diffY < 30 && diffX > 60) { startReply(msgId, text.substring(0,20)+'...'); vibrate('react'); } });
     document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) contextMenu.style.display = 'none'; });
     
     chatArea.appendChild(wrap); chatArea.scrollTop = chatArea.scrollHeight;
     if (isDestruct && !isMe && !msgId.toString().startsWith('temp')) setTimeout(() => { deleteMessage(msgId, true); }, 10000);
 }
 
+window.playAudio = (el, src) => {
+    if (currentAudioPlayer) { currentAudioPlayer.pause(); document.querySelectorAll('.custom-audio').forEach(a => a.classList.remove('playing')); }
+    if (currentAudioPlayer && currentAudioPlayer.src === src) { currentAudioPlayer = null; return; }
+    const audio = new Audio(src); audio.play(); currentAudioPlayer = audio;
+    el.classList.add('playing'); el.querySelector('.audio-play-btn').innerText = '⏸️';
+    audio.onended = () => { el.classList.remove('playing'); el.querySelector('.audio-play-btn').innerText = '▶️'; currentAudioPlayer = null; };
+};
+
 // ==========================================
-// 6. توابع کنش‌ها
+// 11. توابع کنش‌ها
 // ==========================================
 async function sendMessage(text = null) {
     const input = document.getElementById('msgInput');
     const sendBtn = document.getElementById('sendBtn');
     const msgText = text || input.value.trim(); if (!msgText || !ISSUE_NUMBER) return;
     if (!text) { input.value = ''; input.style.height = 'auto'; sendBtn.innerText = '🎤'; }
+    
+    // تشخیص احساس
+    if (!msgText.startsWith('[')) {
+        const sentiment = detectSentiment(msgText);
+        if (sentiment) applySentiment(sentiment);
+    }
     
     let finalBody = `${ME}: `; if (replyToId) finalBody += `[R:${replyToId}] `; if (isDestructMode) finalBody += `[DESTRUCT] `;
     if (msgText.startsWith('[IMG]') || msgText.startsWith('[AUDIO]') || msgText.startsWith('[LOC]') || msgText.startsWith('[MUSIC]')) finalBody += msgText;
@@ -228,7 +417,8 @@ async function sendMessage(text = null) {
     if (!msgText.startsWith('[') && (msgText.includes('تولد') || msgText.includes('دوستت دارم') || msgText.includes('Happy') || msgText.includes('love'))) triggerEmojiRain();
     
     renderMessage(msgText, true, new Date().toISOString(), 'temp-' + Date.now(), null, false, null, true, isDestructMode);
-    if(navigator.vibrate) navigator.vibrate(15); cancelReply(); if (isDestructMode) toggleDestruct();
+    playSynthSound('send'); vibrate('send');
+    cancelReply(); if (isDestructMode) toggleDestruct();
     
     const success = await DataAdapter.sendMessage(ISSUE_NUMBER, finalBody);
     if (success) { lastETag = null; setTimeout(() => fetchAndRenderMessages(true), 500); }
@@ -238,7 +428,7 @@ async function addReaction(msgId, emoji, event) {
     const rect = event.target.getBoundingClientRect(); const floatEl = document.createElement('div');
     floatEl.className = 'float-emoji'; floatEl.innerText = emoji; floatEl.style.left = rect.left + 'px'; floatEl.style.top = rect.top + 'px';
     document.body.appendChild(floatEl); setTimeout(() => floatEl.remove(), 1000);
-    if(navigator.vibrate) navigator.vibrate(10);
+    playSynthSound('react'); vibrate('react');
     try {
         const GITHUB_TOKEN = CONFIG.GITHUB.TOKEN_PART_1 + CONFIG.GITHUB.TOKEN_PART_2;
         const res = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB.OWNER}/${CONFIG.GITHUB.REPO}/issues/comments/${msgId}`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
@@ -252,19 +442,10 @@ async function addReaction(msgId, emoji, event) {
 
 async function deleteMessage(msgId, silent = false) {
     if(!silent && !confirm('حذف شود؟')) return;
+    playSynthSound('delete'); vibrate('delete');
     await DataAdapter.deleteMessage(msgId);
     const wrap = document.querySelector(`.msg-wrap[data-id="${msgId}"]`);
     if(wrap) { if (silent) { wrap.style.transition = 'opacity 1s, transform 1s'; wrap.style.opacity = '0'; wrap.style.transform = 'scale(0.8)'; setTimeout(() => wrap.remove(), 1000); } else { wrap.remove(); } }
-    if(navigator.vibrate) navigator.vibrate(30);
-}
-
-function playMusicCard(btn) {
-    const url = btn.dataset.preview; if (!url) return;
-    if (currentCardAudio) { currentCardAudio.pause(); if (currentCardBtn) { currentCardBtn.innerText = '▶️ پخش'; currentCardBtn.classList.remove('playing'); } }
-    if (currentCardBtn === btn && currentCardAudio) { currentCardAudio = null; currentCardBtn = null; return; }
-    const audio = new Audio(url); audio.play(); currentCardAudio = audio; currentCardBtn = btn;
-    btn.innerText = '⏸️ توقف'; btn.classList.add('playing');
-    audio.onended = () => { btn.innerText = '▶️ پخش'; btn.classList.remove('playing'); currentCardAudio = null; currentCardBtn = null; };
 }
 
 function playTTS(text) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(text); u.lang = 'fa-IR'; window.speechSynthesis.speak(u); } document.querySelectorAll('.context-menu').forEach(m => m.style.display='none'); }
@@ -272,7 +453,7 @@ function startReply(id, textPreview) { replyToId = id; const input = document.ge
 function cancelReply() { replyToId = null; document.getElementById('msgInput').placeholder = "پیامی بنویسید..."; }
 
 // ==========================================
-// 7. تنظیمات UI
+// 12. تنظیمات UI
 // ==========================================
 function initThemeAndAvatar() {
     const themeBtn = document.getElementById('themeBtn');
@@ -299,11 +480,17 @@ function setupUI() {
     const fileInput = document.getElementById('fileInput');
     const chatArea = document.getElementById('chatArea');
     const scrollBtn = document.getElementById('scrollBtn');
+    const avatarWrapper = document.querySelector('.avatar-wrapper');
 
     input.addEventListener('input', function() {
         this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';
         updateTypingStatus();
         sendBtn.innerText = this.value.trim() === '' ? '🎤' : '➤';
+        
+        if (avatarWrapper) {
+            if (this.value.trim() !== '') avatarWrapper.classList.add('typing');
+            else avatarWrapper.classList.remove('typing');
+        }
     });
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (input.value.trim() !== '') sendMessage(); } });
     sendBtn.addEventListener('click', () => { if (input.value.trim() !== '') sendMessage(); else startVoiceRecording(); });
@@ -346,13 +533,38 @@ function setupUI() {
     window.clearPin = () => { pinBuffer = ''; updatePinDots(); };
     window.updatePinDots = () => { document.querySelectorAll('.pin-dots div').forEach((dot, i) => { dot.classList.toggle('filled', i < pinBuffer.length); }); if (pinBuffer.length === 4) setTimeout(window.submitPin, 200); };
     window.submitPin = () => { if (pinBuffer === savedPin) { document.getElementById('pinScreen').style.display = 'none'; pinBuffer = ''; } else { alert('رمز اشتباه!'); window.clearPin(); } };
-    window.toggleDestruct = () => { isDestructMode = !isDestructMode; const btn = document.getElementById('destructBtn'); btn.style.color = isDestructMode ? '#ef4444' : 'var(--text-muted)'; };
-    window.sendLocation = () => { if (!navigator.geolocation) return alert('مرورگر پشتیبانی نمی‌کند.'); navigator.geolocation.getCurrentPosition((pos) => { sendMessage(`[LOC]${pos.coords.latitude},${pos.coords.longitude}`); }, () => { alert('دسترسی به موقعیت داده نشد.'); }); };
+    
+    window.toggleDestruct = () => { 
+        isDestructMode = !isDestructMode; 
+        const btn = document.getElementById('destructBtn'); 
+        if(isDestructMode) { btn.classList.add('destruct-active'); }
+        else { btn.classList.remove('destruct-active'); }
+        vibrate('react');
+    };
+    
+    window.sendLocation = () => { 
+        if (!navigator.geolocation) return alert('مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند.'); 
+        navigator.geolocation.getCurrentPosition(
+            (pos) => { sendMessage(`[LOC]${pos.coords.latitude},${pos.coords.longitude}`); }, 
+            (error) => {
+                let msg = 'خطا در دریافت موقعیت: ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED: msg += 'شما دسترسی به موقعیت را رد کردید.'; break;
+                    case error.POSITION_UNAVAILABLE: msg += 'اطلاعات موقعیت در دسترس نیست.'; break;
+                    case error.TIMEOUT: msg += 'زمان درخواست به پایان رسید.'; break;
+                    default: msg += 'خطای نامشخص.'; break;
+                }
+                alert(msg);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        ); 
+    };
+    
     window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); };
 }
 
 // ==========================================
-// 8. تایپینگ، ویس و میکروفون
+// 13. تایپینگ، ویس و میکروفون
 // ==========================================
 let lastTypingTime = 0;
 async function updateTypingStatus() {
@@ -376,47 +588,46 @@ async function startVoiceRecording() {
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.onstop = () => { const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); const reader = new FileReader(); reader.readAsDataURL(audioBlob); reader.onloadend = () => { sendMessage(`[AUDIO]${reader.result}`); }; stream.getTracks().forEach(track => track.stop()); };
         mediaRecorder.start(); isRecordingVoice = true; document.getElementById('sendBtn').innerText = '🔴'; document.getElementById('sendBtn').style.background = 'linear-gradient(135deg,#ef4444,#b91c1c)';
-        if(navigator.vibrate) navigator.vibrate(50);
+        vibrate('error');
     } catch (err) { alert('دسترسی به میکروفون داده نشد!'); }
 }
-function stopVoiceRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecordingVoice = false; document.getElementById('sendBtn').innerText = '🎤'; document.getElementById('sendBtn').style.background = 'linear-gradient(135deg,#6366f1,#ec4899)'; }
-function cancelVoiceRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecordingVoice = false; audioChunks = []; document.getElementById('sendBtn').innerText = '🎤'; document.getElementById('sendBtn').style.background = 'linear-gradient(135deg,#6366f1,#ec4899)'; }
+function stopVoiceRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecordingVoice = false; document.getElementById('sendBtn').innerText = '🎤'; document.getElementById('sendBtn').style.background = 'linear-gradient(135deg,var(--accent),#ec4899)'; }
+function cancelVoiceRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecordingVoice = false; audioChunks = []; document.getElementById('sendBtn').innerText = '🎤'; document.getElementById('sendBtn').style.background = 'linear-gradient(135deg,var(--accent),#ec4899)'; }
 
 // ==========================================
-// 9. موزیک
+// 14. موزیک (جستجوی یوتیوب)
 // ==========================================
 window.openMusicSearch = () => { document.getElementById('musicSearchOverlay').style.display = 'flex'; setTimeout(() => document.getElementById('musicSearchInput').focus(), 200); };
 window.closeMusicSearch = () => { document.getElementById('musicSearchOverlay').style.display = 'none'; document.getElementById('musicSearchInput').value = ''; document.getElementById('musicSearchResults').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.9rem">اسم آهنگ یا خواننده رو بنویس و جستجو کن 🎵</div>'; if (currentPreviewAudio) { currentPreviewAudio.pause(); currentPreviewAudio = null; } };
 
 window.doMusicSearch = async () => {
     const query = document.getElementById('musicSearchInput').value.trim(); if (!query) return;
-    const resultsDiv = document.getElementById('musicSearchResults'); resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">⏳ در حال جستجو...</div>';
+    const resultsDiv = document.getElementById('musicSearchResults'); resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">⏳ در حال جستجو در یوتیوب...</div>';
     try {
-        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=15`); const data = await res.json();
-        if (!data.results || data.results.length === 0) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">نتیجه‌ای یافت نشد 😔</div>'; return; }
+        const res = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=music_songs`);
+        const data = await res.json();
+        
+        if (!data.items || data.items.length === 0) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">نتیجه‌ای یافت نشد 😔</div>'; return; }
+        
         resultsDiv.innerHTML = ''; let count = 0;
-        data.results.forEach((track, idx) => {
-            if (!track.previewUrl) return; count++;
+        data.items.slice(0, 10).forEach((track, idx) => {
+            if (!track.url) return; count++;
+            const videoId = track.url.split('v=')[1];
             const div = document.createElement('div'); div.className = 'music-result-item';
-            div.innerHTML = `<img src="${track.artworkUrl60}" class="music-result-art"><div class="music-result-info"><div class="music-result-title">${escapeHtml(track.trackName || '')}</div><div class="music-result-artist">${escapeHtml(track.artistName || '')}</div></div><div class="music-result-actions"><button class="play-btn" data-idx="${idx}">▶️</button><button class="send-btn-sm" data-idx="${idx}" style="background:linear-gradient(135deg,#6366f1,#a855f7);color:white">📤</button></div>`;
+            div.innerHTML = `<img src="${track.thumbnail}" class="music-result-art"><div class="music-result-info"><div class="music-result-title">${escapeHtml(track.title || '')}</div><div class="music-result-artist">${escapeHtml(track.uploaderName || '')}</div></div><div class="music-result-actions"><button class="play-btn" data-idx="${idx}">▶️</button><button class="send-btn-sm" data-idx="${idx}" style="background:linear-gradient(135deg,var(--accent),#a855f7);color:white">📤</button></div>`;
             resultsDiv.appendChild(div);
+            
             const playBtn = div.querySelector('.play-btn'); const sendBtn = div.querySelector('.send-btn-sm');
-            playBtn.addEventListener('click', () => {
-                if (currentPreviewAudio) { currentPreviewAudio.pause(); currentPreviewAudio = null; }
-                if (currentPreviewBtn === playBtn) { playBtn.classList.remove('active'); playBtn.innerText = '▶️'; currentPreviewBtn = null; return; }
-                if (currentPreviewBtn) { currentPreviewBtn.classList.remove('active'); currentPreviewBtn.innerText = '▶️'; }
-                const audio = new Audio(track.previewUrl); audio.play(); currentPreviewAudio = audio; currentPreviewBtn = playBtn; playBtn.classList.add('active'); playBtn.innerText = '⏸';
-                audio.onended = () => { playBtn.classList.remove('active'); playBtn.innerText = '▶️'; };
-            });
+            playBtn.addEventListener('click', () => { window.open(`https://youtube.com/watch?v=${videoId}`, '_blank'); });
             sendBtn.addEventListener('click', () => {
-                const safeTitle = (track.trackName || '').replace(/\|\|\|/g, '').replace(/\n/g, ' ');
-                const safeArtist = (track.artistName || '').replace(/\|\|\|/g, '').replace(/\n/g, ' ');
-                sendMessage(`[MUSIC]${safeTitle}|||${safeArtist}|||${track.artworkUrl100 || ''}|||${track.previewUrl}`);
+                const safeTitle = (track.title || '').replace(/\|\|\|/g, '').replace(/\n/g, ' ');
+                const safeArtist = (track.uploaderName || '').replace(/\|\|\|/g, '').replace(/\n/g, ' ');
+                sendMessage(`[MUSIC]${videoId}|||${safeTitle}|||${safeArtist}|||${track.thumbnail}`);
                 window.closeMusicSearch();
             });
         });
         if (count === 0) resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">آهنگی پیدا نشد.</div>';
-    } catch(e) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444">خطا در جستجو.</div>'; }
+    } catch(e) { resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444">خطا در جستجو. لطفا اتصال اینترنت را بررسی کنید.</div>'; }
 };
 
 window.toggleMusic = () => {
@@ -437,7 +648,7 @@ function playChord() {
 }
 
 // ==========================================
-// 10. پس زمینه و افکت‌ها
+// 15. پس زمینه و افکت‌ها
 // ==========================================
 function setupBackground() {
     const canvas=document.getElementById("bgCanvas"), ctx=canvas.getContext("2d");
@@ -475,9 +686,4 @@ function createPostcard(msgId) {
     for(let n = 0; n < words.length; n++) { const testLine = line + words[n] + ' '; if(ctx.measureText(testLine).width > 700) { ctx.fillText(line, 400, y); line = words[n] + ' '; y += 60; } else { line = testLine; } }
     ctx.fillText(line, 400, y); ctx.font = '24px Tahoma'; ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillText(`از طرف ${ME} برای ${TO}`, 400, 500);
     const dataUrl = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = dataUrl; a.download = 'postcard.png'; a.click();
-}
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-}
+    }
