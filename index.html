@@ -50,16 +50,27 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .msg-bubble:active{transform:scale(.97)}
 .reply-quote{background:rgba(128,128,128,.1);border-right:3px solid #38bdf8;padding:4px 8px;border-radius:6px;font-size:.75rem;margin-bottom:6px;color:var(--text-muted);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .media-img{width:100%;max-height:250px;border-radius:14px;object-fit:cover;margin-bottom:8px;border:1px solid rgba(128,128,128,.2);display:block}
-
-/* Music Card */
+.audio-player{width:100%;margin-bottom:8px;border-radius:10px;outline:none}
 .music-card{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);border-radius:12px;padding:10px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);text-decoration:none;color:inherit;transition:background .2s}
 .music-card:hover{background:rgba(0,0,0,0.3)}
-.music-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#b91c1c);display:flex;justify-content:center;align-items:center;color:white;font-size:1.2rem}
+.music-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#b91c1c);display:flex;justify-content:center;align-items:center;color:white;font-size:1.2rem;flex-shrink:0}
 .music-icon.spotify{background:linear-gradient(135deg,#1db954,#168f3e)}
 .music-details{flex:1;overflow:hidden}
 .music-title{font-size:.85rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .music-subtitle{font-size:.7rem;opacity:.7}
-.music-play-btn{background:rgba(255,255,255,0.1);border:none;border-radius:50%;width:36px;height:36px;color:white;display:flex;justify-content:center;align-items:center;cursor:pointer}
+.destruct-badge{display:inline-block;background:#ef4444;color:white;font-size:.6rem;padding:2px 6px;border-radius:8px;margin-bottom:6px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* Full Music Card */
+.music-card-full{background:linear-gradient(145deg,rgba(0,0,0,0.3),rgba(0,0,0,0.15));border-radius:16px;padding:12px;margin-bottom:8px;display:flex;gap:12px;align-items:center;border:1px solid rgba(255,255,255,0.1);width:100%;box-sizing:border-box}
+.music-card-full .mc-art{width:70px;height:70px;border-radius:12px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+.music-card-full .mc-info{flex:1;min-width:0;text-align:right}
+.music-card-full .mc-title{font-size:.9rem;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-card-full .mc-artist{font-size:.75rem;opacity:.7;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-card-full .mc-controls{display:flex;gap:6px}
+.music-card-full .mc-play{background:linear-gradient(135deg,#6366f1,#a855f7);border:none;color:white;border-radius:10px;padding:6px 14px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .15s;display:flex;align-items:center;gap:4px}
+.music-card-full .mc-play:active{transform:scale(.95)}
+.music-card-full .mc-play.playing{background:linear-gradient(135deg,#ef4444,#b91c1c)}
 
 .msg-meta{display:flex;align-items:center;justify-content:flex-end;gap:5px;font-size:.65rem;color:var(--text-muted);margin-top:6px;font-weight:500}
 .msg-wrap.me .msg-meta{color:var(--meta-text)}
@@ -80,8 +91,9 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 
 .float-emoji{position:fixed;font-size:2rem;pointer-events:none;z-index:9999;animation:floatUp 1s ease-out forwards}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(1.5)}}
+.emoji-rain{position:fixed;top:-50px;font-size:2rem;pointer-events:none;z-index:9999;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}
 
-/* Sidebar */
 #sidebar{position:absolute;top:0;right:-300px;width:280px;height:100%;background:var(--header-bg);backdrop-filter:blur(25px);border-left:1px solid var(--border);z-index:100;transition:right .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,0.3)}
 #sidebar.open{right:0}
 .sidebar-header{padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
@@ -92,12 +104,31 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .sidebar-item.active{background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.3)}
 .sidebar-avatar{width:36px;height:36px;border-radius:50%;background:#6366f1;display:flex;justify-content:center;align-items:center;color:white;font-weight:bold}
 
-/* Search Box */
 #searchBox{display:none;padding:10px 16px;background:var(--header-bg);border-bottom:1px solid var(--border);position:absolute;top:73px;width:100%;z-index:9}
 #searchBox input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);outline:none;font-family:inherit}
 
-footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg);backdrop-filter:blur(25px);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:8px}
-.action-btn.footer-btn{background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;padding-bottom:10px}
+/* Music Search Modal */
+#musicSearchOverlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:150;display:none;flex-direction:column;padding:20px}
+.music-modal-content{background:var(--header-bg);border:1px solid var(--border);border-radius:20px;padding:16px;display:flex;flex-direction:column;height:100%;max-height:85vh;margin-top:auto;margin-bottom:auto}
+.music-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.music-modal-header h3{color:var(--text);font-size:1.1rem}
+.music-search-input{width:100%;padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:1rem;outline:none;margin-bottom:16px;font-family:inherit}
+.music-search-input:focus{border-color:#6366f1}
+#musicSearchResults{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
+#musicSearchResults::-webkit-scrollbar{width:4px}
+#musicSearchResults::-webkit-scrollbar-thumb{background:rgba(128,128,128,.3);border-radius:4px}
+.music-result-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:12px;background:rgba(128,128,128,.05);border:1px solid var(--border)}
+.music-result-art{width:50px;height:50px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.music-result-info{flex:1;min-width:0;text-align:right}
+.music-result-title{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-result-artist{font-size:.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-result-actions{display:flex;gap:6px}
+.music-result-actions button{background:rgba(128,128,128,.15);border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:1rem;display:flex;justify-content:center;align-items:center;transition:transform .15s;color:var(--text)}
+.music-result-actions button:active{transform:scale(.9)}
+.music-result-actions button.play-btn.active{background:#ef4444;color:white}
+
+footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg);backdrop-filter:blur(25px);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:6px}
+.action-btn.footer-btn{background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;padding-bottom:10px}
 #msgInput{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:20px;padding:12px 16px;color:var(--text);font-size:.9rem;outline:none;resize:none;max-height:100px;overflow-y:hidden;line-height:1.4;font-family:inherit}
 #msgInput::placeholder{color:var(--text-muted)}
 .send-btn-container{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#ec4899);display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 5px 15px rgba(99,102,241,.3);transition:transform .2s}
@@ -158,9 +189,7 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
 <h3>لیست مخاطبین</h3>
 <button class="action-btn" onclick="toggleSidebar()">✖</button>
 </div>
-<div class="sidebar-list" id="sidebarList">
-<div style="text-align:center;padding:20px;color:var(--text-muted);">در حال بارگذاری...</div>
-</div>
+<div class="sidebar-list" id="sidebarList"></div>
 </div>
 
 <div id="chatArea">
@@ -175,17 +204,18 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
 <input type="file" id="fileInput" accept="image/*" style="display:none">
 <input type="file" id="wallInput" accept="image/*" style="display:none" onchange="setWallpaper(event)">
 <button class="action-btn footer-btn" id="attachBtn" onclick="document.getElementById('fileInput').click()">📎</button>
+<button class="action-btn footer-btn" id="musicSearchBtn" onclick="openMusicSearch()" title="سرچ آهنگ">🎶</button>
+<button class="action-btn footer-btn" id="destructBtn" onclick="toggleDestruct()" title="پیام خودتخریب">💣</button>
+<button class="action-btn footer-btn" id="locBtn" onclick="sendLocation()" title="ارسال موقعیت">📍</button>
 <textarea id="msgInput" placeholder="پیامی بنویسید..." rows="1" autocomplete="off"></textarea>
-<div class="send-btn-container">
+<div class="send-btn-container" id="micBtnContainer">
 <button id="sendBtn" onclick="handleSend()">🎤</button>
 </div>
 </footer>
 
 <div id="pinScreen">
 <h2>رمز عبور را وارد کنید</h2>
-<div class="pin-dots" id="pinDots">
-<div></div><div></div><div></div><div></div>
-</div>
+<div class="pin-dots" id="pinDots"><div></div><div></div><div></div><div></div></div>
 <div class="pin-pad">
 <button onclick="enterPin('1')">1</button><button onclick="enterPin('2')">2</button><button onclick="enterPin('3')">3</button>
 <button onclick="enterPin('4')">4</button><button onclick="enterPin('5')">5</button><button onclick="enterPin('6')">6</button>
@@ -201,11 +231,28 @@ footer{position:relative;z-index:10;padding:12px 16px;background:var(--header-bg
 </div>
 </div>
 
+<!-- Music Search Modal -->
+<div id="musicSearchOverlay" onclick="if(event.target.id==='musicSearchOverlay') closeMusicSearch()">
+<div class="music-modal-content">
+<div class="music-modal-header">
+<h3>🎶 جستجوی آهنگ</h3>
+<button class="action-btn" onclick="closeMusicSearch()" style="font-size:1.5rem">✖</button>
+</div>
+<input type="text" class="music-search-input" id="musicSearchInput" placeholder="اسم آهنگ یا خواننده..." onkeydown="if(event.key==='Enter') doMusicSearch()">
+<div style="margin-bottom:12px">
+<button onclick="doMusicSearch()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-weight:600;cursor:pointer;font-family:inherit;font-size:.95rem">🔍 جستجو</button>
+</div>
+<div id="musicSearchResults">
+<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.9rem">اسم آهنگ یا خواننده رو بنویس و جستجو کن 🎵</div>
+</div>
+</div>
+</div>
+
 </div>
 
 <script>
 // ==========================================
-// 1. تنظیمات اولیه و صدا
+// 1. تنظیمات اولیه
 // ==========================================
 const tokenPart1 = 'github_pat_11CSMC2CA07gm0UueWTT8h';
 const tokenPart2 = '_M10flwPtPqL7slsyycEwWN0i6DA1SXTcWX2pp7vCyU5KMXY5ZYXa7dwu7dd';
@@ -236,110 +283,61 @@ let TYPING_ISSUE_NUM = null;
 let lastETag = null;
 let replyToId = null;
 let lastReadMsgId = Number(localStorage.getItem(`lastRead_${ME}_${TO}`)) || 0;
-let recognition = null;
-let isRecording = false;
+let renderedMsgIds = new Set();
+let isDestructMode = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecordingVoice = false;
+let currentPreviewAudio = null;
+let currentPreviewBtn = null;
 
-// Audio Context & Music
-let audioCtx = null;
-let isMusicPlaying = false;
-let chordInterval = null;
-let analyser = null;
-const chords = [
-  [261.63, 329.63, 392.00, 493.88], // Cmaj7
-  [220.00, 261.63, 329.63, 392.00], // Am7
-  [174.61, 220.00, 261.63, 329.63], // Fmaj7
-  [196.00, 246.94, 293.66, 349.23]  // G7
-];
+// E2EE
+function encryptText(text) {
+  const key = 'ch4t-s3cr3t-k3y'; let result = '';
+  for(let i = 0; i < text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  return btoa(unescape(encodeURIComponent(result)));
+}
+function decryptText(encoded) {
+  try {
+    const key = 'ch4t-s3cr3t-k3y'; const text = decodeURIComponent(escape(atob(encoded))); let result = '';
+    for(let i = 0; i < text.length; i++) result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    return result;
+  } catch(e) { return encoded; }
+}
+
+// Music
+let audioCtx = null, isMusicPlaying = false, chordInterval = null, analyser = null;
+const chords = [[261.63, 329.63, 392.00, 493.88], [220.00, 261.63, 329.63, 392.00], [174.61, 220.00, 261.63, 329.63], [196.00, 246.94, 293.66, 349.23]];
 let chordIdx = 0;
-
-function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 32;
-    analyser.connect(audioCtx.destination);
-  }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-
+function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); analyser = audioCtx.createAnalyser(); analyser.fftSize = 32; analyser.connect(audioCtx.destination); } if (audioCtx.state === 'suspended') audioCtx.resume(); }
 function toggleMusic() {
-  initAudio();
-  const btn = document.getElementById('musicBtn');
-  if (isMusicPlaying) {
-    clearInterval(chordInterval);
-    isMusicPlaying = false;
-    btn.innerText = '🔇';
-    if(navigator.vibrate) navigator.vibrate(10);
-  } else {
-    isMusicPlaying = true;
-    btn.innerText = '🎵';
-    playChord();
-    chordInterval = setInterval(playChord, 3500);
-    if(navigator.vibrate) navigator.vibrate(20);
-  }
+  initAudio(); const btn = document.getElementById('musicBtn');
+  if (isMusicPlaying) { clearInterval(chordInterval); isMusicPlaying = false; btn.innerText = '🔇'; }
+  else { isMusicPlaying = true; btn.innerText = '🎵'; playChord(); chordInterval = setInterval(playChord, 3500); }
 }
-
 function playChord() {
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
-  const currentChord = chords[chordIdx % chords.length];
-  chordIdx++;
+  if (!audioCtx) return; const now = audioCtx.currentTime; const currentChord = chords[chordIdx % chords.length]; chordIdx++;
   currentChord.forEach((freq, i) => {
     const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), filter = audioCtx.createBiquadFilter();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, now + i * 0.1);
-    filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, now);
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.03, now + i * 0.1 + 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 3.5);
-    osc.connect(filter); filter.connect(gain); gain.connect(analyser);
-    osc.start(now + i * 0.1); osc.stop(now + 4);
-  });
-}
-
-function playTypeSound() {
-  if (!audioCtx || !isMusicPlaying) return;
-  const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-  osc.type = 'triangle'; osc.frequency.setValueAtTime(1500, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-  osc.connect(gain); gain.connect(analyser);
-  osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-}
-
-function playReceiveChime() {
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
-  [880, 1108.73].forEach((freq, i) => {
-    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now + i * 0.1);
-    gain.gain.setValueAtTime(0, now + i * 0.1);
-    gain.gain.linearRampToValueAtTime(0.1, now + i * 0.1 + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.5);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now + i * 0.1); filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, now);
+    gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.03, now + i * 0.1 + 0.1); gain.gain.exponentialRampToValueAtTime(0.001, now + 3.5);
+    osc.connect(filter); filter.connect(gain); gain.connect(analyser); osc.start(now + i * 0.1); osc.stop(now + 4);
   });
 }
 
 // ==========================================
-// 2. تنظیمات رابط کاربری
+// 2. رابط کاربری
 // ==========================================
 const currentTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', currentTheme);
 themeBtn.innerText = currentTheme === 'dark' ? '🌙' : '☀️';
-
 const savedWall = localStorage.getItem(`wall_${ME}`);
-if (savedWall) {
-  document.getElementById('wallpaper').style.backgroundImage = `url(${savedWall})`;
-  document.getElementById('wallpaper').style.opacity = '0.3';
-}
+if (savedWall) { document.getElementById('wallpaper').style.backgroundImage = `url(${savedWall})`; document.getElementById('wallpaper').style.opacity = '0.3'; }
 
 function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const newTheme = isDark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  themeBtn.innerText = newTheme === 'dark' ? '🌙' : '☀️';
+  const newTheme = isDark ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme); themeBtn.innerText = newTheme === 'dark' ? '🌙' : '☀️';
 }
 
 const savedEmoji = localStorage.getItem(`avatar_${ME}`) || ME.charAt(0).toUpperCase();
@@ -348,32 +346,18 @@ avatarEl.style.background = `linear-gradient(135deg, ${stringToColor(ME)}, ${str
 
 function openEmojiPicker() { document.getElementById('emojiOverlay').style.display = 'flex'; }
 function closeEmojiPicker(e) { if(e.target.id === 'emojiOverlay') document.getElementById('emojiOverlay').style.display = 'none'; }
-function setAvatar(emoji) {
-  localStorage.setItem(`avatar_${ME}`, emoji);
-  avatarEl.innerText = emoji;
-  closeEmojiPicker({target:{id:'emojiOverlay'}});
-}
-function stringToColor(str) {
-  let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  let color = '#'; for (let i = 0; i < 3; i++) { let value = (hash >> (i * 8)) & 0xFF; color += ('00' + value.toString(16)).substr(-2); }
-  return color;
-}
+function setAvatar(emoji) { localStorage.setItem(`avatar_${ME}`, emoji); avatarEl.innerText = emoji; closeEmojiPicker({target:{id:'emojiOverlay'}}); }
+function stringToColor(str) { let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash); let color = '#'; for (let i = 0; i < 3; i++) { let value = (hash >> (i * 8)) & 0xFF; color += ('00' + value.toString(16)).substr(-2); } return color; }
 
 function setWallpaper(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    localStorage.setItem(`wall_${ME}`, ev.target.result);
-    document.getElementById('wallpaper').style.backgroundImage = `url(${ev.target.result})`;
-    document.getElementById('wallpaper').style.opacity = '0.3';
-  };
+  const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
+  reader.onload = (ev) => { localStorage.setItem(`wall_${ME}`, ev.target.result); document.getElementById('wallpaper').style.backgroundImage = `url(${ev.target.result})`; document.getElementById('wallpaper').style.opacity = '0.3'; };
   reader.readAsDataURL(file);
 }
 
 function toggleSearch() {
   searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
-  if (searchBox.style.display === 'block') searchInput.focus();
-  else { searchInput.value = ''; filterMessages(); }
+  if (searchBox.style.display === 'block') searchInput.focus(); else { searchInput.value = ''; filterMessages(); }
 }
 function filterMessages() {
   const query = searchInput.value.toLowerCase();
@@ -384,48 +368,126 @@ function filterMessages() {
   });
 }
 
-// PIN
-let pinBuffer = '';
-const savedPin = localStorage.getItem('chatPin');
-function togglePinScreen() {
-  if (savedPin) { if(confirm('رمز فعلی حذف شود؟')) { localStorage.removeItem('chatPin'); location.reload(); } }
-  else { const newPin = prompt('یک رمز ۴ رقمی جدید وارد کنید:'); if (newPin && newPin.length === 4 && !isNaN(newPin)) { localStorage.setItem('chatPin', newPin); alert('رمز تنظیم شد.'); } }
-}
+let pinBuffer = ''; const savedPin = localStorage.getItem('chatPin');
+function togglePinScreen() { if (savedPin) { if(confirm('رمز فعلی حذف شود؟')) { localStorage.removeItem('chatPin'); location.reload(); } } else { const newPin = prompt('رمز ۴ رقمی جدید:'); if (newPin && newPin.length === 4 && !isNaN(newPin)) { localStorage.setItem('chatPin', newPin); alert('رمز تنظیم شد.'); } } }
 if (savedPin) document.getElementById('pinScreen').style.display = 'flex';
 function enterPin(num) { if (pinBuffer.length < 4) { pinBuffer += num; updatePinDots(); } }
 function clearPin() { pinBuffer = ''; updatePinDots(); }
-function updatePinDots() {
-  document.querySelectorAll('.pin-dots div').forEach((dot, i) => { dot.classList.toggle('filled', i < pinBuffer.length); });
-  if (pinBuffer.length === 4) setTimeout(submitPin, 200);
+function updatePinDots() { document.querySelectorAll('.pin-dots div').forEach((dot, i) => { dot.classList.toggle('filled', i < pinBuffer.length); }); if (pinBuffer.length === 4) setTimeout(submitPin, 200); }
+function submitPin() { if (pinBuffer === savedPin) { document.getElementById('pinScreen').style.display = 'none'; pinBuffer = ''; } else { alert('رمز اشتباه!'); clearPin(); } }
+
+// ==========================================
+// 3. Music Search
+// ==========================================
+function openMusicSearch() {
+  document.getElementById('musicSearchOverlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('musicSearchInput').focus(), 200);
 }
-function submitPin() {
-  if (pinBuffer === savedPin) { document.getElementById('pinScreen').style.display = 'none'; pinBuffer = ''; }
-  else { alert('رمز اشتباه است!'); clearPin(); if(navigator.vibrate) navigator.vibrate([100, 50, 100]); }
+function closeMusicSearch() {
+  document.getElementById('musicSearchOverlay').style.display = 'none';
+  document.getElementById('musicSearchInput').value = '';
+  document.getElementById('musicSearchResults').innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.9rem">اسم آهنگ یا خواننده رو بنویس و جستجو کن 🎵</div>';
+  if (currentPreviewAudio) { currentPreviewAudio.pause(); currentPreviewAudio = null; }
+}
+
+async function doMusicSearch() {
+  const query = document.getElementById('musicSearchInput').value.trim();
+  if (!query) return;
+  const resultsDiv = document.getElementById('musicSearchResults');
+  resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">⏳ در حال جستجو...</div>';
+  
+  try {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=15`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (!data.results || data.results.length === 0) {
+      resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">نتیجه‌ای یافت نشد 😔</div>';
+      return;
+    }
+    
+    resultsDiv.innerHTML = '';
+    let count = 0;
+    data.results.forEach((track, idx) => {
+      if (!track.previewUrl) return;
+      count++;
+      const div = document.createElement('div');
+      div.className = 'music-result-item';
+      div.innerHTML = `
+        <img src="${track.artworkUrl60}" class="music-result-art">
+        <div class="music-result-info">
+          <div class="music-result-title">${escapeHtml(track.trackName || '')}</div>
+          <div class="music-result-artist">${escapeHtml(track.artistName || '')}</div>
+        </div>
+        <div class="music-result-actions">
+          <button class="play-btn" data-idx="${idx}">▶️</button>
+          <button class="send-btn-sm" data-idx="${idx}" style="background:linear-gradient(135deg,#6366f1,#a855f7);color:white">📤</button>
+        </div>
+      `;
+      resultsDiv.appendChild(div);
+      
+      const playBtn = div.querySelector('.play-btn');
+      const sendBtn = div.querySelector('.send-btn-sm');
+      
+      playBtn.addEventListener('click', () => {
+        if (currentPreviewAudio) { currentPreviewAudio.pause(); currentPreviewAudio = null; }
+        if (currentPreviewBtn === playBtn) {
+          playBtn.classList.remove('active');
+          playBtn.innerText = '▶️';
+          currentPreviewBtn = null;
+          return;
+        }
+        if (currentPreviewBtn) { currentPreviewBtn.classList.remove('active'); currentPreviewBtn.innerText = '▶️'; }
+        const audio = new Audio(track.previewUrl);
+        audio.play();
+        currentPreviewAudio = audio;
+        currentPreviewBtn = playBtn;
+        playBtn.classList.add('active');
+        playBtn.innerText = '⏸';
+        audio.onended = () => { playBtn.classList.remove('active'); playBtn.innerText = '▶️'; };
+      });
+      
+      sendBtn.addEventListener('click', () => {
+        sendMusicCard(track.trackName || '', track.artistName || '', track.artworkUrl100 || '', track.previewUrl);
+        closeMusicSearch();
+      });
+    });
+    
+    if (count === 0) {
+      resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">آهنگی با پیش‌نمایش پیدا نشد. یه کلمه دیگه امتحان کن.</div>';
+    }
+  } catch(e) {
+    resultsDiv.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444">خطا در جستجو. اینترنت یا VPN را بررسی کنید.</div>';
+  }
+}
+
+function sendMusicCard(title, artist, artwork, preview) {
+  const safeTitle = title.replace(/\|\|\|/g, '').replace(/\n/g, ' ');
+  const safeArtist = artist.replace(/\|\|\|/g, '').replace(/\n/g, ' ');
+  const payload = `[MUSIC]${safeTitle}|||${safeArtist}|||${artwork}|||${preview}`;
+  sendMessage(payload);
 }
 
 // ==========================================
-// 3. شروع چت
+// 4. شروع چت
 // ==========================================
 if (!ME || !TO) { document.getElementById('app').innerHTML = `<div style="padding:20px;text-align:center;color:#fbbf24">لینک ناقص است.</div>`; }
 else { chatTitle.innerText = `چت با ${TO}`; startChat(); loadSidebar(); }
 
-function toggleSidebar() { sidebar.classList.toggle('open'); if(navigator.vibrate) navigator.vibrate(10); }
+function toggleSidebar() { sidebar.classList.toggle('open'); }
 async function loadSidebar() {
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
-    const issues = await res.json();
-    sidebarList.innerHTML = '';
+    const issues = await res.json(); sidebarList.innerHTML = '';
     issues.forEach(issue => {
       if (issue.title.startsWith('Chat-')) {
         const parts = issue.title.replace('Chat-', '').split('-');
         if (parts.includes(ME.toLowerCase())) {
           const otherPerson = parts.find(p => p !== ME.toLowerCase());
           const isActive = otherPerson === TO.toLowerCase();
-          const div = document.createElement('div');
-          div.className = `sidebar-item ${isActive ? 'active' : ''}`;
+          const div = document.createElement('div'); div.className = `sidebar-item ${isActive ? 'active' : ''}`;
           div.innerHTML = `<div class="sidebar-avatar">${otherPerson.charAt(0).toUpperCase()}</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem;">${otherPerson}</div><div style="font-size:.7rem;color:var(--text-muted)">اتاق ${issue.number}</div></div>`;
-          div.onclick = () => { window.location.href = `?me=${ME}&to=${otherPerson}`; };
-          sidebarList.appendChild(div);
+          div.onclick = () => { window.location.href = `?me=${ME}&to=${otherPerson}`; }; sidebarList.appendChild(div);
         }
       }
     });
@@ -434,108 +496,111 @@ async function loadSidebar() {
 }
 
 function getRoomTitle() { return `Chat-${[ME.toLowerCase().trim(), TO.toLowerCase().trim()].sort().join('-')}`; }
-
 async function findOrCreateRoom() {
   presenceStatus.innerText = 'در حال جستجو...';
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
-    const issues = await res.json();
-    const existing = issues.find(i => i.title === getRoomTitle());
+    const issues = await res.json(); const existing = issues.find(i => i.title === getRoomTitle());
     if (existing) { presenceStatus.innerText = 'متصل'; return existing.number; }
     presenceStatus.innerText = 'ساخت اتاق...';
     const createRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues`, { method: 'POST', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ title: getRoomTitle(), body: `اتاق خودکار` }) });
     const newIssue = await createRes.json(); presenceStatus.innerText = 'متصل'; return newIssue.number;
   } catch (e) { presenceStatus.innerText = 'خطا'; return null; }
 }
-
 async function findOrCreateTypingIssue() {
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
-    const issues = await res.json();
-    const existing = issues.find(i => i.title === `_typing_status_${getRoomTitle()}`);
+    const issues = await res.json(); const existing = issues.find(i => i.title === `_typing_status_${getRoomTitle()}`);
     if (existing) return existing.number;
     const createRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues`, { method: 'POST', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ title: `_typing_status_${getRoomTitle()}`, body: `none` }) });
     const newIssue = await createRes.json(); return newIssue.number;
   } catch (e) { return null; }
 }
-
 async function startChat() {
-  ISSUE_NUMBER = await findOrCreateRoom();
-  if (!ISSUE_NUMBER) return alert('اتصال برقرار نشد.');
-  TYPING_ISSUE_NUM = await findOrCreateTypingIssue();
-  await fetchMessages();
-  setInterval(fetchMessages, 2500);
-  setInterval(checkTypingStatus, 2500);
+  ISSUE_NUMBER = await findOrCreateRoom(); if (!ISSUE_NUMBER) return alert('اتصال برقرار نشد.');
+  TYPING_ISSUE_NUM = await findOrCreateTypingIssue(); await fetchMessages(true);
+  setInterval(() => fetchMessages(false), 2500); setInterval(checkTypingStatus, 2500);
 }
 
 // ==========================================
-// 4. دریافت پیام‌ها
+// 5. دریافت پیام‌ها
 // ==========================================
-let allMessages = [];
-async function fetchMessages() {
+async function fetchMessages(isInitial = false) {
   if (!ISSUE_NUMBER) return;
   try {
     const headers = { 'Authorization': `Bearer ${GITHUB_TOKEN}` };
-    if (lastETag) headers['If-None-Match'] = lastETag;
+    if (lastETag && !isInitial) headers['If-None-Match'] = lastETag;
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, { headers });
     if (res.status === 304) return;
     if (!res.ok) return;
     
     lastETag = res.headers.get('ETag');
-    allMessages = await res.json();
-    chatArea.innerHTML = `<div class="pill">امروز</div>`;
+    const newMessages = await res.json();
     let unreadDividerAdded = false;
+    if (isInitial) { chatArea.innerHTML = `<div class="pill">امروز</div>`; renderedMsgIds.clear(); }
     
-    allMessages.forEach((msg) => {
+    newMessages.forEach((msg) => {
       const colonIdx = msg.body.indexOf(': ');
       if (colonIdx === -1) return;
       const sender = msg.body.substring(0, colonIdx);
-      let text = msg.body.substring(colonIdx + 2);
+      let rawText = msg.body.substring(colonIdx + 2);
       
       let isRead = false;
-      if (text.includes('[READ]')) { isRead = true; text = text.replace('[READ]', '').trim(); }
+      if (rawText.includes('[READ]')) { isRead = true; rawText = rawText.replace('[READ]', '').trim(); }
+      let isDestruct = false;
+      if (rawText.includes('[DESTRUCT]')) { isDestruct = true; rawText = rawText.replace('[DESTRUCT]', '').trim(); }
       
       let replyHtml = '';
-      const replyMatch = text.match(/^\[R:(\d+)\]\s*/);
+      const replyMatch = rawText.match(/^\[R:(\d+)\]\s*/);
       if (replyMatch) {
-        const originalMsg = allMessages.find(m => m.id == replyMatch[1]);
+        const originalMsg = newMessages.find(m => m.id == replyMatch[1]);
         if (originalMsg) {
           const origColon = originalMsg.body.indexOf(': ');
-          let origText = originalMsg.body.substring(origColon + 2).replace(/^\[R:\d+\]\s*/, '').replace('[READ]', '').trim();
+          let origText = originalMsg.body.substring(origColon + 2).replace(/^\[R:\d+\]\s*/, '').replace('[READ]', '').replace('[DESTRUCT]', '').trim();
           if(origText.includes('[IMG]')) origText = '🖼️ عکس';
+          if(origText.includes('[AUDIO]')) origText = '🎤 پیام صوتی';
+          if(origText.includes('[MUSIC]')) origText = '🎵 آهنگ';
           if(origText.includes('http')) origText = '🔗 لینک';
-          replyHtml = `<div class="reply-quote">${originalMsg.body.substring(0, origColon)}: ${escapeHtml(origText)}</div>`;
+          else origText = decryptText(origText);
+          replyHtml = `<div class="reply-quote">${originalMsg.body.substring(0, origColon)}: ${escapeHtml(origText.substring(0,30))}...</div>`;
         }
-        text = text.replace(/^\[R:\d+\]\s*/, '');
+        rawText = rawText.replace(/^\[R:\d+\]\s*/, '');
       }
       
       let reaction = null;
-      const reactionMatch = text.match(/\s*\{([^\}]+)\}\s*$/);
-      if (reactionMatch) { reaction = reactionMatch[1]; text = text.replace(/\s*\{([^\}]+)\}\s*$/, '').trim(); }
+      const reactionMatch = rawText.match(/\s*\{([^\}]+)\}\s*$/);
+      if (reactionMatch) { reaction = reactionMatch[1]; rawText = rawText.replace(/\s*\{([^\}]+)\}\s*$/, '').trim(); }
       
+      let text = rawText;
+      if (!text.startsWith('[IMG]') && !text.startsWith('[AUDIO]') && !text.startsWith('[LOC]') && !text.startsWith('[MUSIC]')) {
+        text = decryptText(text);
+      }
+
       if (sender !== ME && sender !== TO) return;
       const isMe = sender === ME;
-      
-      if (!isMe && msg.id > lastReadMsgId && !unreadDividerAdded) {
-        const divider = document.createElement('div');
-        divider.className = 'unread-divider';
-        divider.innerText = 'پیام‌های جدید';
-        chatArea.appendChild(divider);
-        unreadDividerAdded = true;
+      if (isInitial && !isMe && msg.id > lastReadMsgId && !unreadDividerAdded) {
+        const divider = document.createElement('div'); divider.className = 'unread-divider'; divider.innerText = 'پیام‌های جدید';
+        chatArea.appendChild(divider); unreadDividerAdded = true;
       }
-      
-      renderMessage(text, isMe, msg.created_at, msg.id, reaction, isRead, replyHtml);
+
+      if (!renderedMsgIds.has(msg.id)) {
+        renderMessage(text, isMe, msg.created_at, msg.id, reaction, isRead, replyHtml, isMe, isDestruct);
+        renderedMsgIds.add(msg.id);
+      } else {
+        const existingWrap = document.querySelector(`.msg-wrap[data-id="${msg.id}"]`);
+        if (existingWrap) {
+          const tick = existingWrap.querySelector('.tick');
+          if (tick && isRead && !tick.classList.contains('read')) { tick.innerText = '✓✓'; tick.classList.add('read'); }
+          const badge = existingWrap.querySelector('.reaction-badge');
+          if (badge && reaction && badge.innerText !== reaction) { badge.innerText = reaction; badge.style.display = 'block'; }
+        }
+      }
       if (!isMe && !isRead) markAsRead(msg.id, msg.body);
     });
     
-    if (allMessages.length > 0) {
-      const lastId = allMessages[allMessages.length - 1].id;
+    if (newMessages.length > 0) {
+      const lastId = newMessages[newMessages.length - 1].id;
       if (lastId > lastReadMsgId) { lastReadMsgId = lastId; localStorage.setItem(`lastRead_${ME}_${TO}`, lastId); }
-    }
-    
-    if (allMessages.length > 0 && !chatArea.dataset.initialLoad) { chatArea.dataset.initialLoad = 'true'; }
-    else if (allMessages.length > 0 && allMessages[allMessages.length - 1].body.startsWith(TO) && lastETag) {
-      playReceiveChime(); if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
     }
   } catch (error) {}
 }
@@ -544,22 +609,16 @@ async function markAsRead(commentId, originalBody) {
   try {
     if(originalBody.includes('[READ]')) return;
     await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/comments/${commentId}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ body: originalBody + ' [READ]' }) });
-    lastETag = null;
   } catch(e) {}
 }
 
 // ==========================================
-// 5. تایپینگ
+// 6. تایپینگ
 // ==========================================
 let lastTypingTime = 0;
 async function updateTypingStatus() {
-  if (!TYPING_ISSUE_NUM) return;
-  const now = Date.now();
-  if (now - lastTypingTime < 2000) return;
-  lastTypingTime = now;
-  try {
-    await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${TYPING_ISSUE_NUM}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ body: `${ME}|${now}` }) });
-  } catch(e) {}
+  if (!TYPING_ISSUE_NUM) return; const now = Date.now(); if (now - lastTypingTime < 2000) return; lastTypingTime = now;
+  try { await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${TYPING_ISSUE_NUM}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ body: `${ME}|${now}` }) }); } catch(e) {}
 }
 async function checkTypingStatus() {
   if (!TYPING_ISSUE_NUM) return;
@@ -575,45 +634,49 @@ async function checkTypingStatus() {
 }
 
 // ==========================================
-// 6. رندر پیام، لینک آهنگ و منو
+// 7. رندر پیام
 // ==========================================
-function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml) {
+function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml, isNew = true, isDestruct = false) {
   const wrap = document.createElement('div');
   wrap.className = 'msg-wrap' + (isMe ? ' me' : '');
   wrap.dataset.id = msgId;
+  if (!isNew || msgId.toString().startsWith('temp')) wrap.style.animation = 'none';
+
   const time = new Date(timestamp).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
   
   let contentHtml = '';
-  // Music Card Logic
-  const ytRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+)/g;
-  const spotifyRegex = /(https?:\/\/(?:open\.)?spotify\.com\/[^\s]+)/g;
-  const ytMatch = text.match(ytRegex);
-  const spotifyMatch = text.match(spotifyRegex);
-
   if (text.startsWith('[IMG]')) {
     contentHtml = `<img src="${text.replace('[IMG]', '')}" class="media-img">`;
-  } else if (ytMatch) {
+  } else if (text.startsWith('[AUDIO]')) {
+    contentHtml = `<audio controls src="${text.replace('[AUDIO]', '')}" class="audio-player"></audio>`;
+  } else if (text.startsWith('[LOC]')) {
+    const coords = text.replace('[LOC]', '');
+    contentHtml = `<a href="https://maps.google.com/?q=${coords}" target="_blank" class="music-card"><div class="music-icon" style="background:#10b981">📍</div><div class="music-details"><div class="music-title">موقعیت مکانی</div><div class="music-subtitle">برای دیدن نقشه کلیک کنید</div></div></a>`;
+  } else if (text.startsWith('[MUSIC]')) {
+    const parts = text.replace('[MUSIC]', '').split('|||');
+    const title = parts[0] || ''; const artist = parts[1] || ''; const artwork = parts[2] || ''; const preview = parts[3] || '';
+    const cardId = 'mc-' + msgId;
     contentHtml = `
-      <a href="${ytMatch[0]}" target="_blank" class="music-card">
-        <div class="music-icon">▶️</div>
-        <div class="music-details">
-          <div class="music-title">آهنگ یوتیوب</div>
-          <div class="music-subtitle">برای پخش کلیک کنید</div>
+      <div class="music-card-full">
+        <img src="${artwork}" class="mc-art" onerror="this.style.display='none'">
+        <div class="mc-info">
+          <div class="mc-title">${escapeHtml(title)}</div>
+          <div class="mc-artist">${escapeHtml(artist)}</div>
+          <div class="mc-controls">
+            <button class="mc-play" data-cardid="${cardId}" data-preview="${preview}" onclick="playMusicCard(this)">▶️ پخش</button>
+          </div>
         </div>
-      </a>`;
-  } else if (spotifyMatch) {
-    contentHtml = `
-      <a href="${spotifyMatch[0]}" target="_blank" class="music-card">
-        <div class="music-icon spotify">🎵</div>
-        <div class="music-details">
-          <div class="music-title">آهنگ اسپاتیفای</div>
-          <div class="music-subtitle">برای پخش کلیک کنید</div>
-        </div>
-      </a>`;
+      </div>`;
   } else {
-    contentHtml = `<p>${escapeHtml(text)}</p>`;
+    const ytRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+)/g;
+    const spotifyRegex = /(https?:\/\/(?:open\.)?spotify\.com\/[^\s]+)/g;
+    const ytMatch = text.match(ytRegex); const spotifyMatch = text.match(spotifyRegex);
+    if (ytMatch) contentHtml = `<a href="${ytMatch[0]}" target="_blank" class="music-card"><div class="music-icon">▶️</div><div class="music-details"><div class="music-title">آهنگ یوتیوب</div><div class="music-subtitle">برای پخش کلیک کنید</div></div></a>`;
+    else if (spotifyMatch) contentHtml = `<a href="${spotifyMatch[0]}" target="_blank" class="music-card"><div class="music-icon spotify">🎵</div><div class="music-details"><div class="music-title">آهنگ اسپاتیفای</div><div class="music-subtitle">برای پخش کلیک کنید</div></div></a>`;
+    else contentHtml = `<p>${escapeHtml(text)}</p>`;
   }
 
+  const destructHtml = isDestruct ? `<div class="destruct-badge">💣 پیام خودتخریب</div>` : '';
   const contextMenu = document.createElement('div');
   contextMenu.className = 'context-menu';
   contextMenu.innerHTML = `
@@ -621,6 +684,7 @@ function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml
     <div class="menu-actions">
       <button onclick="startReply(${msgId}, '${escapeHtml(text.substring(0,20))}...')">↩️ پاسخ</button>
       <button onclick="playTTS('${escapeHtml(text.replace(/[\\'\\n\\r]/g, ''))}')">🔊 خواندن</button>
+      <button onclick="createPostcard(${msgId})">🖼️ کارت پستال</button>
       ${isMe ? `<button onclick="deleteMessage(${msgId})" style="color:#ef4444">🗑️ حذف</button>` : ''}
     </div>
   `;
@@ -628,8 +692,9 @@ function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml
   const tickHtml = isMe ? `<span class="tick ${isRead ? 'read' : ''}">${isRead ? '✓✓' : '🕒'}</span>` : '';
 
   wrap.innerHTML = `
-    <div class="msg-bubble">
+    <div class="msg-bubble" id="bubble-${msgId}">
       ${replyHtml || ''}
+      ${destructHtml}
       ${contentHtml}
       <div class="msg-meta"><span>${time}</span>${tickHtml}</div>
       <div class="reaction-badge" style="${reaction ? 'display:block' : ''}">${reaction || ''}</div>
@@ -639,57 +704,43 @@ function renderMessage(text, isMe, timestamp, msgId, reaction, isRead, replyHtml
 
   let pressTimer = null, touchStartX = 0, touchStartY = 0;
   const bubble = wrap.querySelector('.msg-bubble');
-  
-  bubble.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-    pressTimer = setTimeout(() => { contextMenu.style.display = 'flex'; if(navigator.vibrate) navigator.vibrate(20); }, 500);
-  });
-  bubble.addEventListener('touchmove', (e) => {
-    clearTimeout(pressTimer);
-    let diffX = e.touches[0].clientX - touchStartX;
-    let diffY = Math.abs(e.touches[0].clientY - touchStartY);
-    if (diffY < 30 && diffX > 0 && diffX < 80) { bubble.style.transform = `translateX(${diffX}px)`; }
-  });
-  bubble.addEventListener('touchend', (e) => {
-    clearTimeout(pressTimer);
-    let diffX = e.changedTouches[0].clientX - touchStartX;
-    let diffY = Math.abs(e.changedTouches[0].clientY - touchStartY);
-    bubble.style.transform = 'translateX(0)';
-    if (diffY < 30 && diffX > 60) { startReply(msgId, text.substring(0,20)+'...'); if(navigator.vibrate) navigator.vibrate(15); }
-  });
+  bubble.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; pressTimer = setTimeout(() => { contextMenu.style.display = 'flex'; if(navigator.vibrate) navigator.vibrate(20); }, 500); });
+  bubble.addEventListener('touchmove', (e) => { clearTimeout(pressTimer); let diffX = e.touches[0].clientX - touchStartX, diffY = Math.abs(e.touches[0].clientY - touchStartY); if (diffY < 30 && diffX > 0 && diffX < 80) bubble.style.transform = `translateX(${diffX}px)`; });
+  bubble.addEventListener('touchend', (e) => { clearTimeout(pressTimer); let diffX = e.changedTouches[0].clientX - touchStartX, diffY = Math.abs(e.changedTouches[0].clientY - touchStartY); bubble.style.transform = 'translateX(0)'; if (diffY < 30 && diffX > 60) { startReply(msgId, text.substring(0,20)+'...'); if(navigator.vibrate) navigator.vibrate(15); } });
   
   document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) contextMenu.style.display = 'none'; });
   chatArea.appendChild(wrap);
   chatArea.scrollTop = chatArea.scrollHeight;
+
+  if (isDestruct && !isMe && !msgId.toString().startsWith('temp')) {
+    setTimeout(() => { deleteMessage(msgId, true); }, 10000);
+  }
+}
+
+// Music card play
+let currentCardAudio = null, currentCardBtn = null;
+function playMusicCard(btn) {
+  const url = btn.dataset.preview;
+  if (!url) return;
+  if (currentCardAudio) { currentCardAudio.pause(); if (currentCardBtn) { currentCardBtn.innerText = '▶️ پخش'; currentCardBtn.classList.remove('playing'); } }
+  if (currentCardBtn === btn && currentCardAudio) { currentCardAudio = null; currentCardBtn = null; return; }
+  const audio = new Audio(url);
+  audio.play();
+  currentCardAudio = audio; currentCardBtn = btn;
+  btn.innerText = '⏸️ توقف'; btn.classList.add('playing');
+  audio.onended = () => { btn.innerText = '▶️ پخش'; btn.classList.remove('playing'); currentCardAudio = null; currentCardBtn = null; };
 }
 
 function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function playTTS(text) {
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fa-IR';
-    window.speechSynthesis.speak(utterance);
-  } else { alert('مرورگر شما پشتیبانی نمی‌کند.'); }
-  document.querySelectorAll('.context-menu').forEach(m => m.style.display='none');
-}
-
-function startReply(id, textPreview) {
-  replyToId = id; input.value = textPreview; input.focus();
-  input.placeholder = "پاسخ به: " + textPreview;
-  document.querySelectorAll('.context-menu').forEach(m => m.style.display='none');
-}
+function playTTS(text) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(text); u.lang = 'fa-IR'; window.speechSynthesis.speak(u); } document.querySelectorAll('.context-menu').forEach(m => m.style.display='none'); }
+function startReply(id, textPreview) { replyToId = id; input.value = textPreview; input.focus(); input.placeholder = "پاسخ به: " + textPreview; document.querySelectorAll('.context-menu').forEach(m => m.style.display='none'); }
 function cancelReply() { replyToId = null; input.placeholder = "پیامی بنویسید..."; }
 
 async function addReaction(msgId, emoji, event) {
   const rect = event.target.getBoundingClientRect();
   const floatEl = document.createElement('div');
-  floatEl.className = 'float-emoji';
-  floatEl.innerText = emoji;
-  floatEl.style.left = rect.left + 'px'; floatEl.style.top = rect.top + 'px';
-  document.body.appendChild(floatEl);
-  setTimeout(() => floatEl.remove(), 1000);
-
+  floatEl.className = 'float-emoji'; floatEl.innerText = emoji; floatEl.style.left = rect.left + 'px'; floatEl.style.top = rect.top + 'px';
+  document.body.appendChild(floatEl); setTimeout(() => floatEl.remove(), 1000);
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/comments/${msgId}`, { headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
     const data = await res.json();
@@ -697,72 +748,108 @@ async function addReaction(msgId, emoji, event) {
     const isRead = newBody.includes('[READ]'); newBody = newBody.replace('[READ]', '').trim();
     newBody += ` {${emoji}}`; if (isRead) newBody += ` [READ]`;
     await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/comments/${msgId}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ body: newBody }) });
-    lastETag = null; setTimeout(fetchMessages, 500); if(navigator.vibrate) navigator.vibrate(10);
+    if(navigator.vibrate) navigator.vibrate(10);
   } catch(e) {}
 }
 
-async function deleteMessage(msgId) {
-  if(!confirm('حذف شود؟')) return;
+async function deleteMessage(msgId, silent = false) {
+  if(!silent && !confirm('حذف شود؟')) return;
   try {
     await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/comments/${msgId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` } });
-    lastETag = null; setTimeout(fetchMessages, 500); if(navigator.vibrate) navigator.vibrate(30);
+    const wrap = document.querySelector(`.msg-wrap[data-id="${msgId}"]`);
+    if(wrap) { if (silent) { wrap.style.transition = 'opacity 1s, transform 1s'; wrap.style.opacity = '0'; wrap.style.transform = 'scale(0.8)'; setTimeout(() => wrap.remove(), 1000); } else { wrap.remove(); } }
   } catch(e) {}
 }
 
 // ==========================================
-// 7. ارسال پیام، میکروفون و اسکرول
+// 8. ارسال پیام، میکروفون، لوکیشن
 // ==========================================
 input.addEventListener('input', function() {
   this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';
   updateTypingStatus();
-  playTypeSound();
-  if (this.value.trim() === '') { sendBtn.innerText = '🎤'; } else { sendBtn.innerText = '➤'; }
+  sendBtn.innerText = this.value.trim() === '' ? '🎤' : '➤';
 });
 
-function handleSend() {
-  if (input.value.trim() !== '') sendMessage();
-  else toggleSpeechRecognition();
+function handleSend() { if (input.value.trim() !== '') sendMessage(); else toggleVoiceRecording(); }
+
+let touchStartTimestamp = 0;
+sendBtn.addEventListener('touchstart', (e) => { if (input.value.trim() === '') { touchStartTimestamp = Date.now(); startVoiceRecording(); } });
+sendBtn.addEventListener('touchend', (e) => { if (isRecordingVoice) { const duration = Date.now() - touchStartTimestamp; if (duration < 1000) { cancelVoiceRecording(); alert('برای ضبط ویس، کمی بیشتر نگه دارید.'); } else { stopVoiceRecording(); } } });
+
+async function startVoiceRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream); audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => { const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); const reader = new FileReader(); reader.readAsDataURL(audioBlob); reader.onloadend = () => { sendMessage(`[AUDIO]${reader.result}`); }; stream.getTracks().forEach(track => track.stop()); };
+    mediaRecorder.start(); isRecordingVoice = true;
+    sendBtn.innerText = '🔴'; sendBtn.style.background = 'linear-gradient(135deg,#ef4444,#b91c1c)';
+    if(navigator.vibrate) navigator.vibrate(50);
+  } catch (err) { alert('دسترسی به میکروفون داده نشد!'); }
+}
+function stopVoiceRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecordingVoice = false; sendBtn.innerText = '🎤'; sendBtn.style.background = 'linear-gradient(135deg,#6366f1,#ec4899)'; }
+function cancelVoiceRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecordingVoice = false; audioChunks = []; sendBtn.innerText = '🎤'; sendBtn.style.background = 'linear-gradient(135deg,#6366f1,#ec4899)'; }
+
+function toggleDestruct() {
+  isDestructMode = !isDestructMode; const btn = document.getElementById('destructBtn');
+  btn.style.color = isDestructMode ? '#ef4444' : 'var(--text-muted)';
+  if(navigator.vibrate) navigator.vibrate(10);
 }
 
-function toggleSpeechRecognition() {
-  if (isRecording) { if (recognition) recognition.stop(); isRecording = false; sendBtn.innerText = '🎤'; sendBtn.style.background = 'linear-gradient(135deg,#6366f1,#ec4899)'; return; }
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) { alert('مرورگر شما پشتیبانی نمی‌کند.'); return; }
-  recognition = new SpeechRecognition(); recognition.lang = 'fa-IR'; recognition.interimResults = true;
-  recognition.onstart = function() { isRecording = true; sendBtn.innerText = '⏹️'; sendBtn.style.background = '#ef4444'; if(navigator.vibrate) navigator.vibrate(50); };
-  recognition.onresult = function(event) {
-    let finalTranscript = '';
-    for (let i = event.resultIndex; i < event.results.length; ++i) { if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript; }
-    if (finalTranscript) { input.value += finalTranscript; input.style.height = 'auto'; input.style.height = (input.scrollHeight) + 'px'; sendBtn.innerText = '➤'; }
-  };
-  recognition.onerror = function(event) { stopRecording(); };
-  recognition.onend = function() { stopRecording(); };
-  recognition.start();
+function sendLocation() {
+  if (!navigator.geolocation) return alert('مرورگر پشتیبانی نمی‌کند.');
+  navigator.geolocation.getCurrentPosition((pos) => { sendMessage(`[LOC]${pos.coords.latitude},${pos.coords.longitude}`); }, () => { alert('دسترسی به موقعیت داده نشد.'); });
 }
-function stopRecording() { isRecording = false; sendBtn.innerText = '🎤'; sendBtn.style.background = 'linear-gradient(135deg,#6366f1,#ec4899)'; }
 
 async function sendMessage(text = null) {
   const msgText = text || input.value.trim();
   if (!msgText || !ISSUE_NUMBER) return;
-  
   if (!text) { input.value = ''; input.style.height = 'auto'; sendBtn.innerText = '🎤'; }
   
   let finalBody = `${ME}: `;
   if (replyToId) finalBody += `[R:${replyToId}] `;
-  finalBody += msgText;
+  if (isDestructMode) finalBody += `[DESTRUCT] `;
   
-  renderMessage(msgText, true, new Date().toISOString(), 'temp', null, false, null);
-  cancelReply();
+  if (msgText.startsWith('[IMG]') || msgText.startsWith('[AUDIO]') || msgText.startsWith('[LOC]') || msgText.startsWith('[MUSIC]')) finalBody += msgText;
+  else finalBody += encryptText(msgText);
+  
+  if (!msgText.startsWith('[') && (msgText.includes('تولد') || msgText.includes('دوستت دارم') || msgText.includes('Happy') || msgText.includes('love'))) triggerEmojiRain();
+  
+  renderMessage(msgText, true, new Date().toISOString(), 'temp-' + Date.now(), null, false, null, true, isDestructMode);
+  if(navigator.vibrate) navigator.vibrate(15);
+  cancelReply(); if (isDestructMode) toggleDestruct();
   
   try {
     const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}/comments`, { method: 'POST', headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ body: finalBody }) });
-    if (!res.ok) alert('خطا در ارسال.');
-    else { lastETag = null; setTimeout(fetchMessages, 300); }
-  } catch (error) { alert('مشکل در ارتباط.'); }
+    if (res.ok) { lastETag = null; setTimeout(() => fetchMessages(true), 500); }
+  } catch (error) {}
+}
+
+function triggerEmojiRain() {
+  const emojis = ['🎉','🎈','❤️','✨','🎊','💖','🌟','🥳'];
+  for(let i=0; i<30; i++) { setTimeout(() => { const el = document.createElement('div'); el.className = 'emoji-rain'; el.innerText = emojis[Math.floor(Math.random()*emojis.length)]; el.style.left = Math.random() * 100 + 'vw'; el.style.animationDuration = (Math.random() * 2 + 1.5) + 's'; document.body.appendChild(el); setTimeout(() => el.remove(), 3500); }, i * 50); }
+}
+
+function createPostcard(msgId) {
+  const bubble = document.getElementById(`bubble-${msgId}`);
+  if(!bubble) return;
+  const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+  canvas.width = 800; canvas.height = 600;
+  const grad = ctx.createLinearGradient(0, 0, 800, 600);
+  grad.addColorStop(0, '#6366f1'); grad.addColorStop(1, '#a855f7');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 600);
+  ctx.fillStyle = 'white'; ctx.font = 'bold 40px Tahoma, Arial'; ctx.textAlign = 'center';
+  const text = bubble.querySelector('p') ? bubble.querySelector('p').innerText : '[پیام رسانه‌ای]';
+  const words = text.split(' '); let line = '', y = 250;
+  for(let n = 0; n < words.length; n++) { const testLine = line + words[n] + ' '; if(ctx.measureText(testLine).width > 700) { ctx.fillText(line, 400, y); line = words[n] + ' '; y += 60; } else { line = testLine; } }
+  ctx.fillText(line, 400, y);
+  ctx.font = '24px Tahoma'; ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillText(`از طرف ${ME} برای ${TO}`, 400, 500);
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a'); a.href = dataUrl; a.download = 'postcard.png'; a.click();
 }
 
 chatArea.addEventListener('scroll', () => { const isNearBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight < 100; scrollBtn.style.opacity = isNearBottom ? '0' : '1'; scrollBtn.style.pointerEvents = isNearBottom ? 'none' : 'auto'; });
-function scrollToBottom() { chatArea.scrollTop = chatArea.scrollHeight; if(navigator.vibrate) navigator.vibrate(10); }
+function scrollToBottom() { chatArea.scrollTop = chatArea.scrollHeight; }
 
 document.getElementById('attachBtn').addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => {
@@ -782,7 +869,7 @@ fileInput.addEventListener('change', (e) => {
 });
 
 // ==========================================
-// 8. پس‌زمینه تعاملی و واکنشی به صدا
+// 9. پس‌زمینه
 // ==========================================
 const canvas=document.getElementById("bgCanvas"), ctx=canvas.getContext("2d");
 let particles=[], mouseX = 0, mouseY = 0;
@@ -791,25 +878,13 @@ resizeCanvas(); window.addEventListener("resize",resizeCanvas);
 for(let i=0;i<50;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.8+0.5,dx:(Math.random()-.5)*0.3,dy:(Math.random()-.5)*0.3-0.15,a:Math.random()*0.6+0.2,depth:Math.random()*0.5+0.1});}
 window.addEventListener('mousemove', e => { mouseX = (e.clientX - window.innerWidth/2) * 0.05; mouseY = (e.clientY - window.innerHeight/2) * 0.05; });
 window.addEventListener('touchmove', e => { mouseX = (e.touches[0].clientX - window.innerWidth/2) * 0.05; mouseY = (e.touches[0].clientY - window.innerHeight/2) * 0.05; });
-
 function renderParticles(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  
-  // Audio Reactive Logic
-  let vol = 0;
-  if (analyser && isMusicPlaying) {
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(data);
-    vol = data.reduce((a,b)=>a+b,0) / data.length;
-  }
-
+  let vol = 0; if (analyser && isMusicPlaying) { const data = new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(data); vol = data.reduce((a,b)=>a+b,0) / data.length; }
   particles.forEach(p=>{
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0; if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
-    let drawX = p.x + (mouseX * p.depth), drawY = p.y + (mouseY * p.depth);
-    let drawRadius = p.r + (vol * 0.02);
-    ctx.beginPath(); ctx.arc(drawX,drawY,drawRadius,0,Math.PI*2); 
-    ctx.fillStyle=`rgba(165,180,252,${p.a + (vol*0.005)})`; ctx.fill();
+    p.x+=p.dx; p.y+=p.dy; if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0; if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+    let drawX = p.x + (mouseX * p.depth), drawY = p.y + (mouseY * p.depth), drawRadius = p.r + (vol * 0.02);
+    ctx.beginPath(); ctx.arc(drawX,drawY,drawRadius,0,Math.PI*2); ctx.fillStyle=`rgba(165,180,252,${p.a + (vol*0.005)})`; ctx.fill();
   });
   requestAnimationFrame(renderParticles);
 }
